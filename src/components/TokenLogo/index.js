@@ -8,6 +8,7 @@ import BSC_TOKEN_LIST from '../../constants/tokenLists/bsc.tokenlist'
 import AVALANCHE_TOKEN_LIST from '../../constants/tokenLists/avalanche.tokenlist'
 import FANTOM_TOKEN_LIST from '../../constants/tokenLists/fantom.tokenlist'
 import CRONOS_TOKEN_LIST from '../../constants/tokenLists/cronos.tokenlist'
+import AURORA_TOKEN_LIST from '../../constants/tokenLists/aurora.tokenlist'
 import { isAddress } from '../../utils/index.js'
 import PlaceHolder from '../../assets/placeholder.png'
 import EthereumLogo from '../../assets/eth.png'
@@ -23,6 +24,7 @@ import { getBscTokenLogoURL } from '../../utils/bscTokenMapping'
 import { getAvaxTokenLogoURL } from '../../utils/avaxTokenMapping'
 import { getFantomTokenLogoURL } from '../../utils/fantomTokenMapping'
 import { getCronosTokenLogoURL } from '../../utils/cronosTokenMapping'
+import { getAuroraTokenLogoURL } from '../../utils/auroraTokenMapping'
 
 const BAD_IMAGES = {}
 
@@ -173,6 +175,19 @@ export function getNativeTokenLogo({ size = '24px', ...rest }) {
           />
         </StyledNativeTokenLogo>
       )
+    case '1313161554':
+      return (
+        <StyledNativeTokenLogo size={size} {...rest}>
+          <img
+            src={EthereumLogo}
+            style={{
+              boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
+              borderRadius: '24px',
+            }}
+            alt=""
+          />
+        </StyledNativeTokenLogo>
+      )
     default:
       return (
         <StyledNativeTokenLogo size={size} {...rest}>
@@ -276,6 +291,13 @@ export default function TokenLogo({ address, header = false, size = '24px', ...r
         return getCustomLogo({ address, src: CRONOS_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
       }
       path = getCronosTokenLogoURL(address)
+      break
+
+    case '1313161554':
+      if (formattedAddress && AURORA_TOKEN_LIST[formattedAddress]) {
+        return getCustomLogo({ address, src: AURORA_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+      }
+      path = getAuroraTokenLogoURL(address)
       break
 
     default:

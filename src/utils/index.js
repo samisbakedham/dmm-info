@@ -556,6 +556,8 @@ export function getNativeTokenSymbol() {
       return 'CRO'
     case '338':
       return 'CRO'
+    case '1313161554':
+      return 'ETH'
     default:
       return 'ETH'
   }
@@ -579,6 +581,8 @@ export function getNativeTokenWrappedName() {
       return 'CRO (Wrapped)'
     case '338':
       return 'CRO (Wrapped)'
+    case '1313161554':
+      return 'Ether (Wrapped)'
     default:
       return 'Ether (Wrapped)'
   }
@@ -601,6 +605,8 @@ export function getEtherscanLinkText() {
     case '338':
       return 'Explorer'
     case '25':
+      return 'Explorer'
+    case '1313161554':
       return 'Explorer'
     default:
       return 'Etherscan'
@@ -625,6 +631,8 @@ export function getNetworkName() {
       return 'Cronos'
     case '25':
       return 'Cronos'
+    case '1313161554':
+      return 'Aurora'
     default:
       return 'Ethereum'
   }
@@ -648,6 +656,8 @@ export function getDefaultAddLiquidityUrl() {
       return `${process.env.REACT_APP_DMM_SWAP_URL}pools/CRO`
     case '338':
       return `${process.env.REACT_APP_DMM_SWAP_URL}pools/CRO`
+    case '1313161554':
+      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/ETH`
     default:
       return `${process.env.REACT_APP_DMM_SWAP_URL}pools/ETH/${KNC_ADDRESS}`
   }

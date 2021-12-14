@@ -32,6 +32,7 @@ const EXCHANGE_SUBGRAPH_URLS = {
   ],
   cronosTestnet: ['https://testnet-cronos-subgraph.knstats.com/subgraphs/name/dynamic-amm/dmm-exchange-cronos-testnet'],
   cronos: ['https://cronos-subgraph.kyberswap.com/subgraphs/name/kyberswap/kyberswap-cronos'],
+  aurora: ['https://api.thegraph.com/subgraphs/name/piavgh/dmm-exchange-aurora'],
 }
 
 export function getExchangeSubgraphUrls(networkId) {
@@ -71,6 +72,8 @@ export function getExchangeSubgraphUrls(networkId) {
       return EXCHANGE_SUBGRAPH_URLS.cronosTestnet
     case ChainId.CRONOS:
       return EXCHANGE_SUBGRAPH_URLS.cronos
+    case ChainId.AURORA:
+      return EXCHANGE_SUBGRAPH_URLS.aurora
     default:
       return EXCHANGE_SUBGRAPH_URLS.mainnet
   }

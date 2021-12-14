@@ -43,9 +43,15 @@ const SwitchNetworkButton = () => {
   const below576 = useMedia('(max-width: 576px)')
 
   if (
-    ![ChainId.MAINNET, ChainId.MATIC, ChainId.BSCMAINNET, ChainId.AVAXMAINNET, ChainId.FANTOM, ChainId.CRONOS].includes(
-      chainId
-    )
+    ![
+      ChainId.MAINNET,
+      ChainId.MATIC,
+      ChainId.BSCMAINNET,
+      ChainId.AVAXMAINNET,
+      ChainId.FANTOM,
+      ChainId.CRONOS,
+      ChainId.AURORA,
+    ].includes(chainId)
   ) {
     return null
   }

@@ -23,6 +23,8 @@ export const SUPPORTED_LIST_URLS__NO_ENS =
     ? ['https://raw.githubusercontent.com/pangolindex/tokenlists/main/ab.tokenlist.json']
     : String(process.env.REACT_APP_CHAIN_ID === '250')
     ? ['https://raw.githubusercontent.com/SpookySwap/spooky-info/master/src/constants/token/spookyswap.json']
+    : String(process.env.REACT_APP_CHAIN_ID === '1313161554')
+    ? ['https://raw.githubusercontent.com/aurora-is-near/bridge-assets/master/assets/aurora.tokenlist.json']
     : ['https://gateway.ipfs.io/ipns/tokens.uniswap.org']
 
 // hide from overview list
@@ -72,6 +74,7 @@ export const ANALYTICS_URLS = {
   43114: 'https://avax-analytics.kyberswap.com',
   250: 'https://fantom-analytics.kyberswap.com',
   25: 'https://cronos-analytics.kyberswap.com',
+  1313161554: 'https://explorer.mainnet.aurora.dev',
 }
 
 export const ChainId = {
@@ -86,6 +89,7 @@ export const ChainId = {
   FANTOM: 250,
   CRONOSTESTNET: 338,
   CRONOS: 25,
+  AURORA: 1313161554,
 }
 
 export const MAX_ALLOW_APY = 2000

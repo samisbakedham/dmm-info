@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import styled from 'styled-components'
-import SwitchNetworkButton from './SwitcNetworkButton'
+import SwitchNetworkButton from './SwitchNetworkButton'
 import { useSessionStart } from '../contexts/Application'
 import { Flex, Text } from 'rebass'
 import useTheme from '../hooks/useTheme'
