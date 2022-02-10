@@ -602,6 +602,10 @@ export function getEtherscanLinkText() {
       return 'Explorer'
     case '25':
       return 'Explorer'
+    case '421611':
+      return 'Arbiscan'
+    case '42161':
+      return 'Arbiscan'
     default:
       return 'Etherscan'
   }
@@ -625,6 +629,10 @@ export function getNetworkName() {
       return 'Cronos'
     case '25':
       return 'Cronos'
+    case '42161':
+      return 'Arbitrum'
+    case '421611':
+      return 'Arbitrum Rinkeby'
     default:
       return 'Ethereum'
   }
