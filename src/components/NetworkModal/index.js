@@ -103,6 +103,7 @@ export default function NetworkModal() {
             ChainId.AVAXMAINNET,
             ChainId.FANTOM,
             ChainId.CRONOS,
+            ChainId.ARBITRUM,
           ].map((key, i) => {
             if (chainId === key) {
               return (

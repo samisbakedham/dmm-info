@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-import { ROPSTEN_TOKEN_LOGOS_MAPPING, WETH_ADDRESS } from '../../constants'
+import { ROPSTEN_TOKEN_LOGOS_MAPPING, WETH_ADDRESS, ChainId } from '../../constants'
 import ETHEREUM_TOKEN_LIST from '../../constants/tokenLists/ethereum.tokenlist'
 import POLYGON_TOKEN_LIST from '../../constants/tokenLists/polygon.tokenlist'
 import BSC_TOKEN_LIST from '../../constants/tokenLists/bsc.tokenlist'
 import AVALANCHE_TOKEN_LIST from '../../constants/tokenLists/avalanche.tokenlist'
 import FANTOM_TOKEN_LIST from '../../constants/tokenLists/fantom.tokenlist'
 import CRONOS_TOKEN_LIST from '../../constants/tokenLists/cronos.tokenlist'
+import ARBITRUM_TOKEN_LIST from '../../constants/tokenLists/arbitrum.tokenlist'
 import { isAddress } from '../../utils/index.js'
 import PlaceHolder from '../../assets/placeholder.png'
 import EthereumLogo from '../../assets/eth.png'
@@ -274,6 +275,13 @@ export default function TokenLogo({ address, header = false, size = '24px', ...r
     case '25':
       if (formattedAddress && CRONOS_TOKEN_LIST[formattedAddress]) {
         return getCustomLogo({ address, src: CRONOS_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+      }
+      path = getCronosTokenLogoURL(address)
+      break
+
+    case `${ChainId.ARBITRUM}`:
+      if (formattedAddress && ARBITRUM_TOKEN_LIST[formattedAddress]) {
+        return getCustomLogo({ address, src: ARBITRUM_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
       }
       path = getCronosTokenLogoURL(address)
       break

@@ -4,6 +4,7 @@ import BSC from '../assets/networks/bsc-network.png'
 import AVAX from '../assets/networks/avax-network.png'
 import Fantom from '../assets/networks/fantom-network.png'
 import Cronos from '../assets/networks/cronos-network.png'
+import Arbitrum from '../assets/networks/arbitrum-network.svg'
 import { ChainId } from '.'
 
 export const NETWORK_ICON = {
@@ -13,6 +14,7 @@ export const NETWORK_ICON = {
   [ChainId.AVAXMAINNET]: AVAX,
   [ChainId.FANTOM]: Fantom,
   [ChainId.CRONOS]: Cronos,
+  [ChainId.ARBITRUM]: Arbitrum,
 }
 
 export const NETWORK_LABEL = {
@@ -22,4 +24,5 @@ export const NETWORK_LABEL = {
   [ChainId.AVAXMAINNET]: 'Avalanche',
   [ChainId.FANTOM]: 'Fantom',
   [ChainId.CRONOS]: 'Cronos',
+  [ChainId.ARBITRUM]: 'Arbitrum',
 }

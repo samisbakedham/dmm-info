@@ -136,7 +136,6 @@ function App() {
   // show warning
   const showWarning = headBlock && latestBlock ? headBlock - latestBlock > BLOCK_DIFFERENCE_THRESHOLD : false
 
-  console.log(globalData, globalChartData, latestBlock)
   return (
     <ApolloProvider client={exchangeSubgraphClient || client}>
       <AppWrapper>
