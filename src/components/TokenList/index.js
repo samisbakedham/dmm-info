@@ -11,10 +11,11 @@ import { Divider } from '..'
 
 import { formattedNum, formattedPercent } from '../../utils'
 import { useMedia } from 'react-use'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import { OVERVIEW_TOKEN_BLACKLIST } from '../../constants'
 import FormattedName from '../FormattedName'
 import { TYPE } from '../../Theme'
+import LocalLoader from '../LocalLoader'
 
 dayjs.extend(utc)
 
@@ -142,6 +143,8 @@ function TopTokenList({ tokens, itemMax = 5 }) {
   const below1080 = useMedia('(max-width: 1080px)')
   const below680 = useMedia('(max-width: 680px)')
   const below600 = useMedia('(max-width: 600px)')
+  const { network } = useParams()
+  const prefixNetworkURL = network ? `/${network}` : ''
 
   useEffect(() => {
     setMaxPage(1) // edit this to do modular
@@ -154,6 +157,9 @@ function TopTokenList({ tokens, itemMax = 5 }) {
       Object.keys(tokens)
         .filter((key) => {
           return !OVERVIEW_TOKEN_BLACKLIST.includes(key)
+        })
+        .filter((key) => {
+          return tokens[key]
         })
         .map((key) => tokens[key])
     )
@@ -192,7 +198,7 @@ function TopTokenList({ tokens, itemMax = 5 }) {
           <Row>
             {!below680 && <div style={{ marginRight: '1rem', width: '10px' }}>{index}</div>}
             <TokenLogo address={item.id} />
-            <CustomLink style={{ marginLeft: '16px', whiteSpace: 'nowrap' }} to={'/token/' + item.id}>
+            <CustomLink style={{ marginLeft: '16px', whiteSpace: 'nowrap' }} to={prefixNetworkURL + '/token/' + item.id}>
               <FormattedName
                 text={below680 ? item.symbol : item.name}
                 maxCharacters={below600 ? 8 : 16}
@@ -300,9 +306,9 @@ function TopTokenList({ tokens, itemMax = 5 }) {
         )}
       </TableHeader>
       <Divider />
-      <List p={0}>
-        {filteredList &&
-          filteredList.map((item, index) => {
+      {filteredList?.length ?
+        <List p={0}>
+          {filteredList.map((item, index) => {
             return (
               <div key={index} style={{ padding: '0 20px' }}>
                 <ListItem key={index} index={(page - 1) * itemMax + index + 1} item={item} />
@@ -310,7 +316,9 @@ function TopTokenList({ tokens, itemMax = 5 }) {
               </div>
             )
           })}
-      </List>
+        </List>
+        : <LocalLoader />
+      }
       <PageButtons>
         <div onClick={() => setPage(page === 1 ? page : page - 1)}>
           <Arrow faded={page === 1 ? true : false}>←</Arrow>

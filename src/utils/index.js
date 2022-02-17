@@ -3,12 +3,12 @@ import { BigNumber } from 'bignumber.js'
 import dayjs from 'dayjs'
 import { ethers } from 'ethers'
 import utc from 'dayjs/plugin/utc'
-import { blockClient } from '../apollo/client'
+import { getBlockClient } from '../apollo/client'
 import { GET_BLOCK, GET_BLOCKS, SHARE_VALUE } from '../apollo/queries'
 import { Text } from 'rebass'
 import _Decimal from 'decimal.js-light'
 import toFormat from 'toformat'
-import { timeframeOptions, WETH_ADDRESS, KNC_ADDRESS } from '../constants'
+import { timeframeOptions, getWETH_ADDRESS, getKNC_ADDRESS } from '../constants'
 import Numeral from 'numeral'
 import { OverflowTooltip } from '../components/Tooltip'
 
@@ -44,62 +44,64 @@ export function getTimeframe(timeWindow) {
   return utcStartTime
 }
 
-export function addNetworkIdQueryString(url) {
+export function addNetworkIdQueryString(url, networkInfo) {
   if (url.includes('?')) {
-    return `${url}&networkId=${process.env.REACT_APP_CHAIN_ID}`
+    return `${url}&networkId=${networkInfo.CHAIN_ID}`
   }
 
-  return `${url}?networkId=${process.env.REACT_APP_CHAIN_ID}`
+  return `${url}?networkId=${networkInfo.CHAIN_ID}`
 }
 
-export function getPoolLink(token0Address, token1Address = null, remove = false, poolAddress = null) {
-  const nativeTokenSymbol = getNativeTokenSymbol()
+export function getPoolLink(token0Address, networkInfo, token1Address = null, remove = false, poolAddress = null) {
+  const nativeTokenSymbol = getNativeTokenSymbol(networkInfo)
 
   if (poolAddress) {
     if (!token1Address) {
       return addNetworkIdQueryString(
-        process.env.REACT_APP_DMM_SWAP_URL +
-          (remove ? `remove` : `add`) +
-          `/${token0Address === WETH_ADDRESS ? nativeTokenSymbol : token0Address}/${nativeTokenSymbol}/${poolAddress}`
+        networkInfo.DMM_SWAP_URL +
+        (remove ? `remove` : `add`) +
+        `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${nativeTokenSymbol}/${poolAddress}`,
+        networkInfo
       )
     } else {
       return addNetworkIdQueryString(
-        process.env.REACT_APP_DMM_SWAP_URL +
-          (remove ? `remove` : `add`) +
-          `/${token0Address === WETH_ADDRESS ? nativeTokenSymbol : token0Address}/${
-            token1Address === WETH_ADDRESS ? nativeTokenSymbol : token1Address
-          }/${poolAddress}`
+        networkInfo.DMM_SWAP_URL +
+        (remove ? `remove` : `add`) +
+        `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address
+        }/${poolAddress}`,
+        networkInfo
       )
     }
   }
 
   if (!token1Address) {
     return addNetworkIdQueryString(
-      process.env.REACT_APP_DMM_SWAP_URL +
-        (remove ? `remove` : `add`) +
-        `/${token0Address === WETH_ADDRESS ? nativeTokenSymbol : token0Address}/${nativeTokenSymbol}`
+      networkInfo.DMM_SWAP_URL +
+      (remove ? `remove` : `add`) +
+      `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${nativeTokenSymbol}`,
+      networkInfo
     )
   } else {
     return addNetworkIdQueryString(
-      process.env.REACT_APP_DMM_SWAP_URL +
-        (remove ? `remove` : `add`) +
-        `/${token0Address === WETH_ADDRESS ? nativeTokenSymbol : token0Address}/${
-          token1Address === WETH_ADDRESS ? nativeTokenSymbol : token1Address
-        }`
+      networkInfo.DMM_SWAP_URL +
+      (remove ? `remove` : `add`) +
+      `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address
+      }`,
+      networkInfo
     )
   }
 }
 
-export function getSwapLink(token0Address, token1Address = null) {
-  const nativeTokenSymbol = getNativeTokenSymbol()
+export function getSwapLink(token0Address, networkInfo, token1Address = null) {
+  const nativeTokenSymbol = getNativeTokenSymbol(networkInfo)
 
   if (!token1Address) {
-    return addNetworkIdQueryString(`${process.env.REACT_APP_DMM_SWAP_URL}swap?inputCurrency=${token0Address}`)
+    return addNetworkIdQueryString(`${networkInfo.DMM_SWAP_URL}swap?inputCurrency=${token0Address}`, networkInfo)
   } else {
     return addNetworkIdQueryString(
-      `${process.env.REACT_APP_DMM_SWAP_URL}swap?inputCurrency=${
-        token0Address === WETH_ADDRESS ? nativeTokenSymbol : token0Address
-      }&outputCurrency=${token1Address === WETH_ADDRESS ? nativeTokenSymbol : token1Address}`
+      `${networkInfo.DMM_SWAP_URL}swap?inputCurrency=${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address
+      }&outputCurrency=${token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address}`,
+      networkInfo
     )
   }
 }
@@ -163,18 +165,28 @@ export async function splitQuery(query, localClient, vars, list, skipCount = 100
  * @dev Query speed is optimized by limiting to a 600-second period
  * @param {Int} timestamp in seconds
  */
-export async function getBlockFromTimestamp(timestamp) {
-  if (parseInt(timestamp) < parseInt(process.env.REACT_APP_DEFAULT_START_TIME)) {
-    timestamp = parseInt(process.env.REACT_APP_DEFAULT_START_TIME)
+const cacheGetBlockFromTimestamp = {}
+export async function getBlockFromTimestamp(timestamp, networkInfo) {
+  if (parseInt(timestamp) < parseInt(networkInfo.DEFAULT_START_TIME)) {
+    timestamp = parseInt(networkInfo.DEFAULT_START_TIME)
   }
-  let result = await blockClient.query({
-    query: GET_BLOCK,
-    variables: {
-      timestampFrom: timestamp,
-      timestampTo: timestamp + 600,
-    },
-    fetchPolicy: 'cache-first',
-  })
+  let promise
+  if (cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID]?.[timestamp]) {
+    promise = cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID]?.[timestamp]
+  } else {
+    if (!cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID])
+      cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID] = {}
+    promise = getBlockClient(networkInfo).query({
+      query: GET_BLOCK,
+      variables: {
+        timestampFrom: timestamp,
+        timestampTo: timestamp + 600,
+      },
+      fetchPolicy: 'cache-first',
+    })
+    cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID][timestamp] = promise
+  }
+  let result = await promise
   return result?.data?.blocks?.[0]?.number
 }
 
@@ -185,18 +197,18 @@ export async function getBlockFromTimestamp(timestamp) {
  * @dev timestamps are returns as they were provided; not the block time.
  * @param {Array} timestamps
  */
-export async function getBlocksFromTimestamps(timestamps, skipCount = 500) {
+export async function getBlocksFromTimestamps(timestamps, networkInfo, skipCount = 500) {
   if (timestamps?.length === 0) {
     return []
   }
 
   timestamps = timestamps.map((t) =>
-    parseInt(t) < parseInt(process.env.REACT_APP_DEFAULT_START_TIME)
-      ? parseInt(process.env.REACT_APP_DEFAULT_START_TIME)
+    parseInt(t) < parseInt(networkInfo.DEFAULT_START_TIME)
+      ? parseInt(networkInfo.DEFAULT_START_TIME)
       : t
   )
 
-  let fetchedData = await splitQuery(GET_BLOCKS, blockClient, [], timestamps, skipCount)
+  let fetchedData = await splitQuery(GET_BLOCKS, getBlockClient(networkInfo), [], timestamps, skipCount)
 
   let blocks = []
   if (fetchedData) {
@@ -215,9 +227,10 @@ export async function getBlocksFromTimestamps(timestamps, skipCount = 500) {
   return blocks
 }
 
-export async function getLiquidityTokenBalanceOvertime(client, account, timestamps) {
+//Look like deprecated
+export async function getLiquidityTokenBalanceOvertime(client, account, timestamps, networkInfo) {
   // get blocks based on timestamps
-  const blocks = await getBlocksFromTimestamps(timestamps)
+  const blocks = await getBlocksFromTimestamps(timestamps, networkInfo)
 
   // get historical share values with time travel queries
   let result = await client.query({
@@ -243,7 +256,7 @@ export async function getLiquidityTokenBalanceOvertime(client, account, timestam
  * @param {String} pairAddress
  * @param {Array} timestamps
  */
-export async function getShareValueOverTime(client, pairAddress, timestamps) {
+export async function getShareValueOverTime(client, pairAddress, timestamps, networkInfo) {
   if (!timestamps) {
     const utcCurrentTime = dayjs()
     const utcSevenDaysBack = utcCurrentTime.subtract(8, 'day').unix()
@@ -251,7 +264,7 @@ export async function getShareValueOverTime(client, pairAddress, timestamps) {
   }
 
   // get blocks based on timestamps
-  const blocks = await getBlocksFromTimestamps(timestamps)
+  const blocks = await getBlocksFromTimestamps(timestamps, networkInfo)
 
   // get historical share values with time travel queries
   let result = await client.query({
@@ -329,12 +342,12 @@ export const setThemeColor = (theme) => document.documentElement.style.setProper
 
 export const Big = (number) => new BigNumber(number)
 
-export const urls = {
-  showTransaction: (tx) => `${process.env.REACT_APP_ETHERSCAN_URL}/tx/${tx}/`,
-  showAddress: (address) => `${process.env.REACT_APP_ETHERSCAN_URL}/address/${address}/`,
-  showToken: (address) => `${process.env.REACT_APP_ETHERSCAN_URL}/token/${address}/`,
-  showBlock: (block) => `${process.env.REACT_APP_ETHERSCAN_URL}/block/${block}/`,
-}
+export const getUrls = networkInfo => ({
+  showTransaction: (tx) => `${networkInfo.ETHERSCAN_URL}/tx/${tx}/`,
+  showAddress: (address) => `${networkInfo.ETHERSCAN_URL}/address/${address}/`,
+  showToken: (address) => `${networkInfo.ETHERSCAN_URL}/token/${address}/`,
+  showBlock: (block) => `${networkInfo.ETHERSCAN_URL}/block/${block}/`,
+})
 
 export const formatTime = (unix) => {
   const now = dayjs()
@@ -538,118 +551,118 @@ export function shortenAddress(address, chars = 4) {
   return `${parsed.substring(0, chars + 2)}...${parsed.substring(42 - chars)}`
 }
 
-export function getNativeTokenSymbol() {
-  switch (process.env.REACT_APP_CHAIN_ID) {
-    case '137':
+export function getNativeTokenSymbol(networkInfo) {
+  switch (networkInfo.CHAIN_ID) {
+    case 137:
       return 'MATIC'
-    case '80001':
+    case 80001:
       return 'MATIC'
-    case '56':
+    case 56:
       return 'BNB'
-    case '97':
+    case 97:
       return 'BNB'
-    case '43114':
+    case 43114:
       return 'AVAX'
-    case '250':
+    case 250:
       return 'FTM'
-    case '25':
+    case 25:
       return 'CRO'
-    case '338':
+    case 338:
       return 'CRO'
     default:
       return 'ETH'
   }
 }
 
-export function getNativeTokenWrappedName() {
-  switch (process.env.REACT_APP_CHAIN_ID) {
-    case '137':
+export function getNativeTokenWrappedName(networkInfo) {
+  switch (networkInfo.CHAIN_ID) {
+    case 137:
       return 'Matic (Wrapped)'
-    case '80001':
+    case 80001:
       return 'Matic (Wrapped)'
-    case '56':
+    case 56:
       return 'BNB (Wrapped)'
-    case '97':
+    case 97:
       return 'BNB (Wrapped)'
-    case '43114':
+    case 43114:
       return 'AVAX (Wrapped)'
-    case '250':
+    case 250:
       return 'FTM (Wrapped)'
-    case '25':
+    case 25:
       return 'CRO (Wrapped)'
-    case '338':
+    case 338:
       return 'CRO (Wrapped)'
     default:
       return 'Ether (Wrapped)'
   }
 }
 
-export function getEtherscanLinkText() {
-  switch (process.env.REACT_APP_CHAIN_ID) {
-    case '137':
+export function getEtherscanLinkText(networkInfo) {
+  switch (networkInfo.CHAIN_ID) {
+    case 137:
       return 'Polygonscan'
-    case '80001':
+    case 80001:
       return 'Polygonscan'
-    case '56':
+    case 56:
       return 'Bscscan'
-    case '97':
+    case 97:
       return 'Bscscan'
-    case '43114':
+    case 43114:
       return 'Snowtrace'
-    case '250':
+    case 250:
       return 'Ftmscan'
-    case '338':
+    case 338:
       return 'Explorer'
-    case '25':
+    case 25:
       return 'Explorer'
     default:
       return 'Etherscan'
   }
 }
 
-export function getNetworkName() {
-  switch (process.env.REACT_APP_CHAIN_ID) {
-    case '137':
+export function getNetworkName(networkInfo) {
+  switch (networkInfo.CHAIN_ID) {
+    case 137:
       return 'Polygon'
-    case '80001':
+    case 80001:
       return 'Polygon'
-    case '56':
+    case 56:
       return 'BSC'
-    case '97':
+    case 97:
       return 'BSC'
-    case '43114':
+    case 43114:
       return 'AVAX'
-    case '250':
+    case 250:
       return 'Fantom'
-    case '338':
+    case 338:
       return 'Cronos'
-    case '25':
+    case 25:
       return 'Cronos'
     default:
       return 'Ethereum'
   }
 }
 
-export function getDefaultAddLiquidityUrl() {
-  switch (process.env.REACT_APP_CHAIN_ID) {
-    case '137':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619/${KNC_ADDRESS}`
-    case '80001':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/0x19395624C030A11f58e820C3AeFb1f5960d9742a/${KNC_ADDRESS}`
-    case '56':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/BNB`
-    case '97':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/BNB`
-    case '43114':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/AVAX`
-    case '250':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/FTM`
-    case '25':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/CRO`
-    case '338':
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/CRO`
+export function getDefaultAddLiquidityUrl(networkInfo) {
+  switch (networkInfo.CHAIN_ID) {
+    case 137:
+      return `${networkInfo.DMM_SWAP_URL}pools/0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619/${getKNC_ADDRESS(networkInfo)}`
+    case 80001:
+      return `${networkInfo.DMM_SWAP_URL}pools/0x19395624C030A11f58e820C3AeFb1f5960d9742a/${getKNC_ADDRESS(networkInfo)}`
+    case 56:
+      return `${networkInfo.DMM_SWAP_URL}pools/BNB`
+    case 97:
+      return `${networkInfo.DMM_SWAP_URL}pools/BNB`
+    case 43114:
+      return `${networkInfo.DMM_SWAP_URL}pools/AVAX`
+    case 250:
+      return `${networkInfo.DMM_SWAP_URL}pools/FTM`
+    case 25:
+      return `${networkInfo.DMM_SWAP_URL}pools/CRO`
+    case 338:
+      return `${networkInfo.DMM_SWAP_URL}pools/CRO`
     default:
-      return `${process.env.REACT_APP_DMM_SWAP_URL}pools/ETH/${KNC_ADDRESS}`
+      return `${networkInfo.DMM_SWAP_URL}pools/ETH/${getKNC_ADDRESS(networkInfo)}`
   }
 }
 

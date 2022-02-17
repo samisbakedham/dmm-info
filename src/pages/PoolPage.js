@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import 'feather-icons'
 import { transparentize } from 'polished'
 import styled from 'styled-components'
@@ -39,6 +39,7 @@ import bookMark from '../assets/bookmark.svg'
 import bookMarkOutline from '../assets/bookmark_outline.svg'
 import useTheme from '../hooks/useTheme'
 import { Flex } from 'rebass'
+import { useNetworksInfo } from '../contexts/NetworkInfo'
 
 const DashboardWrapper = styled.div`
   width: 100%;
@@ -141,6 +142,7 @@ function PoolPage({ poolAddress, history }) {
     token1PriceMin,
     token1PriceMax,
   } = usePoolData(poolAddress)
+  const [networksInfo] = useNetworksInfo()
 
   useEffect(() => {
     document.querySelector('body').scrollTo(0, 0)
@@ -166,8 +168,8 @@ function PoolPage({ poolAddress, history }) {
     oneDayVolumeUSD || oneDayVolumeUSD === 0
       ? formattedNum(oneDayVolumeUSD === 0 ? oneDayVolumeUntracked : oneDayVolumeUSD, true)
       : oneDayVolumeUSD === 0
-      ? '$0'
-      : '-'
+        ? '$0'
+        : '-'
 
   // mark if using untracked volume
   const [usingUtVolume, setUsingUtVolume] = useState(false)
@@ -212,7 +214,7 @@ function PoolPage({ poolAddress, history }) {
   const [dismissed, markAsDismissed] = usePathDismissed(history.location.pathname)
 
   // TODO: Remove this when Cronos has a token list
-  const noWarning = process.env.REACT_APP_CHAIN_ID === '25'
+  const noWarning = networksInfo.CHAIN_ID === 25
 
   useEffect(() => {
     window.scrollTo({
@@ -224,6 +226,8 @@ function PoolPage({ poolAddress, history }) {
   const [savedPools, addPool, removePool] = useSavedPools()
 
   const listedTokens = useListedTokens()
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   return (
     <PageWrapper>
@@ -244,7 +248,7 @@ function PoolPage({ poolAddress, history }) {
         <RowBetween>
           <TYPE.body>
             <AutoRow align="flex-end">
-              <BasicLink to="/pairs">{'Pairs '}</BasicLink>→ {token0?.symbol}-{token1?.symbol} →{' '}
+              <BasicLink to={prefixNetworkURL + "/pairs"}>{'Pairs '}</BasicLink>→ {token0?.symbol}-{token1?.symbol} →{' '}
               {shortenAddress(poolAddress, 3)} <CopyHelper toCopy={poolAddress} />
             </AutoRow>
           </TYPE.body>
@@ -269,9 +273,9 @@ function PoolPage({ poolAddress, history }) {
                     <TYPE.main fontSize={below1080 ? '1.5rem' : '2rem'} style={{ margin: '0 1rem' }}>
                       {token0 && token1 ? (
                         <>
-                          <HoverSpan onClick={() => history.push(`/token/${token0?.id}`)}>{token0.symbol}</HoverSpan>
+                          <HoverSpan onClick={() => history.push(prefixNetworkURL + `/token/${token0?.id}`)}>{token0.symbol}</HoverSpan>
                           <span>-</span>
-                          <HoverSpan onClick={() => history.push(`/token/${token1?.id}`)}>
+                          <HoverSpan onClick={() => history.push(prefixNetworkURL + `/token/${token1?.id}`)}>
                             {token1.symbol}
                           </HoverSpan>{' '}
                           Pool
@@ -307,10 +311,10 @@ function PoolPage({ poolAddress, history }) {
                     <></>
                   )}
 
-                  <Link external href={getPoolLink(token0?.id, token1?.id, false, poolAddress)}>
+                  <Link external href={getPoolLink(token0?.id, networksInfo, token1?.id, false, poolAddress)}>
                     <ButtonOutlined style={{ padding: '11px 22px' }}>+ Add Liquidity</ButtonOutlined>
                   </Link>
-                  <Link external href={getSwapLink(token0?.id, token1?.id)}>
+                  <Link external href={getSwapLink(token0?.id, networksInfo, token1?.id)}>
                     <ButtonDark
                       ml={!below1080 && '.5rem'}
                       mr={below1080 && '.5rem'}
@@ -332,26 +336,24 @@ function PoolPage({ poolAddress, history }) {
                 flexWrap: 'wrap',
               }}
             >
-              <FixedPanel onClick={() => history.push(`/token/${token0?.id}`)}>
+              <FixedPanel onClick={() => history.push(prefixNetworkURL + `/token/${token0?.id}`)}>
                 <RowFixed>
                   <TokenLogo address={token0?.id} size={'16px'} />
                   <TYPE.main fontSize={'16px'} lineHeight={1} fontWeight={500} ml={'4px'}>
                     {token0 && token1
-                      ? `1 ${formattedSymbol0} = ${token0Rate} ${formattedSymbol1} ${
-                          parseFloat(token0?.derivedETH) ? '(' + token0USD + ')' : ''
-                        }`
+                      ? `1 ${formattedSymbol0} = ${token0Rate} ${formattedSymbol1} ${parseFloat(token0?.derivedETH) ? '(' + token0USD + ')' : ''
+                      }`
                       : '-'}
                   </TYPE.main>
                 </RowFixed>
               </FixedPanel>
-              <FixedPanel onClick={() => history.push(`/token/${token1?.id}`)}>
+              <FixedPanel onClick={() => history.push(prefixNetworkURL + `/token/${token1?.id}`)}>
                 <RowFixed>
                   <TokenLogo address={token1?.id} size={'16px'} />
                   <TYPE.main fontSize={'16px'} lineHeight={1} fontWeight={500} ml={'4px'}>
                     {token0 && token1
-                      ? `1 ${formattedSymbol1} = ${token1Rate} ${formattedSymbol0}  ${
-                          parseFloat(token1?.derivedETH) ? '(' + token1USD + ')' : ''
-                        }`
+                      ? `1 ${formattedSymbol1} = ${token1Rate} ${formattedSymbol0}  ${parseFloat(token1?.derivedETH) ? '(' + token1USD + ')' : ''
+                      }`
                       : '-'}
                   </TYPE.main>
                 </RowFixed>
@@ -417,7 +419,7 @@ function PoolPage({ poolAddress, history }) {
                       </TYPE.main>
                       <div />
                     </RowBetween>
-                    <Hover onClick={() => history.push(`/token/${token0?.id}`)} fade={true}>
+                    <Hover onClick={() => history.push(prefixNetworkURL + `/token/${token0?.id}`)} fade={true}>
                       <AutoRow gap="4px">
                         <TokenLogo address={token0?.id} />
                         <TYPE.main fontSize={14} lineHeight={1} fontWeight={500}>
@@ -428,7 +430,7 @@ function PoolPage({ poolAddress, history }) {
                         </TYPE.main>
                       </AutoRow>
                     </Hover>
-                    <Hover onClick={() => history.push(`/token/${token1?.id}`)} fade={true}>
+                    <Hover onClick={() => history.push(prefixNetworkURL + `/token/${token1?.id}`)} fade={true}>
                       <AutoRow gap="4px">
                         <TokenLogo address={token1?.id} />
                         <TYPE.main fontSize={14} lineHeight={1} fontWeight={500}>
@@ -492,8 +494,8 @@ function PoolPage({ poolAddress, history }) {
                         {token1PriceMax === '0'
                           ? '0.00'
                           : token1PriceMax === '-1'
-                          ? '♾️'
-                          : parseFloat(token1PriceMax).toPrecision(6)}
+                            ? '♾️'
+                            : parseFloat(token1PriceMax).toPrecision(6)}
                       </TYPE.main>
 
                       <TYPE.main>
@@ -501,8 +503,8 @@ function PoolPage({ poolAddress, history }) {
                         {token1PriceMin === '0'
                           ? '0.00'
                           : token1PriceMin === '-1'
-                          ? '♾️'
-                          : parseFloat(token1PriceMin).toPrecision(6)}
+                            ? '♾️'
+                            : parseFloat(token1PriceMin).toPrecision(6)}
                       </TYPE.main>
                     </Flex>
 
@@ -526,8 +528,8 @@ function PoolPage({ poolAddress, history }) {
                         {token0PriceMax === '0'
                           ? '0.00'
                           : token0PriceMax === '-1'
-                          ? '♾️'
-                          : parseFloat(token0PriceMax).toPrecision(6)}
+                            ? '♾️'
+                            : parseFloat(token0PriceMax).toPrecision(6)}
                       </TYPE.main>
 
                       <TYPE.main>
@@ -535,8 +537,8 @@ function PoolPage({ poolAddress, history }) {
                         {token0PriceMin === '0'
                           ? '0.00'
                           : token0PriceMin === '-1'
-                          ? '‚Äö√¥√¶√î‚àè√®'
-                          : parseFloat(token0PriceMin).toPrecision(6)}
+                            ? '‚Äö√¥√¶√î‚àè√®'
+                            : parseFloat(token0PriceMin).toPrecision(6)}
                       </TYPE.main>
                     </Flex>
                   </Flex>
@@ -628,9 +630,9 @@ function PoolPage({ poolAddress, history }) {
                       <CopyHelper toCopy={token1?.id} />
                     </AutoRow>
                   </Column>
-                  <Link external href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${poolAddress}`}>
+                  <Link external href={`${networksInfo.ETHERSCAN_URL}/address/${poolAddress}`}>
                     <ButtonDark color={backgroundColor} style={{ padding: '11px 22px' }}>
-                      {`View on ${getEtherscanLinkText()}`} ↗
+                      {`View on ${getEtherscanLinkText(networksInfo)}`} ↗
                     </ButtonDark>
                   </Link>
                 </TokenDetailsLayout>

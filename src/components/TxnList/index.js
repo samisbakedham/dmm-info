@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
-import { formatTime, formattedNum, urls } from '../../utils'
+import { formatTime, formattedNum, getUrls } from '../../utils'
 import { useMedia } from 'react-use'
 import { useCurrentCurrency } from '../../contexts/Application'
 import { RowFixed, RowBetween } from '../Row'
@@ -16,6 +16,7 @@ import DropdownSelect from '../DropdownSelect'
 import FormattedName from '../FormattedName'
 import { TYPE } from '../../Theme'
 import useTheme from '../../hooks/useTheme'
+import { useNetworksInfo } from '../../contexts/NetworkInfo'
 
 dayjs.extend(utc)
 
@@ -165,6 +166,9 @@ function getTransactionType(event, symbol0, symbol1) {
 
 // @TODO rework into virtualized list
 function TxnList({ transactions, symbol0Override, symbol1Override, color }) {
+  const [networksInfo] = useNetworksInfo()
+  const urls = useMemo(() => getUrls(networksInfo), [networksInfo])
+
   // page state
   const [page, setPage] = useState(1)
   const [maxPage, setMaxPage] = useState(1)
@@ -314,7 +318,7 @@ function TxnList({ transactions, symbol0Override, symbol1Override, color }) {
         )}
         {!below1080 && (
           <DataText area="account">
-            <Link color={color} external href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${item.account}`}>
+            <Link color={color} external href={`${networksInfo.ETHERSCAN_URL}/address/${item.account}`}>
               {item.account && item.account.slice(0, 6) + '...' + item.account.slice(38, 42)}
             </Link>
           </DataText>

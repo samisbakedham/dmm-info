@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import 'feather-icons'
 import { Link as LinkScroll } from 'react-scroll'
 import styled from 'styled-components'
@@ -31,6 +31,7 @@ import { useListedTokens } from '../contexts/Application'
 import bookMark from '../assets/bookmark.svg'
 import bookMarkOutline from '../assets/bookmark_outline.svg'
 import useTheme from '../hooks/useTheme'
+import { useNetworksInfo } from '../contexts/NetworkInfo'
 
 const DashboardWrapper = styled.div`
   width: 100%;
@@ -120,6 +121,7 @@ function PairPage({ pairAddress, history }) {
 
   const pools = usePairPools(pairAddress)
   const theme = useTheme()
+  const [networksInfo] = useNetworksInfo()
 
   const backgroundColor = theme.primary
 
@@ -138,8 +140,8 @@ function PairPage({ pairAddress, history }) {
     oneDayVolumeUSD || oneDayVolumeUSD === 0
       ? formattedNum(oneDayVolumeUSD === 0 ? oneDayVolumeUntracked : oneDayVolumeUSD, true)
       : oneDayVolumeUSD === 0
-      ? '$0'
-      : '-'
+        ? '$0'
+        : '-'
 
   // mark if using untracked volume
   const [usingUtVolume, setUsingUtVolume] = useState(false)
@@ -168,20 +170,20 @@ function PairPage({ pairAddress, history }) {
   // rates
   const token0Rate =
     token0 &&
-    token1 &&
-    token0.derivedETH &&
-    token1.derivedETH &&
-    parseFloat(token0.derivedETH) > 0 &&
-    parseFloat(token1.derivedETH) > 0
+      token1 &&
+      token0.derivedETH &&
+      token1.derivedETH &&
+      parseFloat(token0.derivedETH) > 0 &&
+      parseFloat(token1.derivedETH) > 0
       ? formattedNum(token0.derivedETH / token1.derivedETH)
       : '-'
   const token1Rate =
     token0 &&
-    token1 &&
-    token0.derivedETH &&
-    token1.derivedETH &&
-    parseFloat(token0.derivedETH) > 0 &&
-    parseFloat(token1.derivedETH) > 0
+      token1 &&
+      token0.derivedETH &&
+      token1.derivedETH &&
+      parseFloat(token0.derivedETH) > 0 &&
+      parseFloat(token1.derivedETH) > 0
       ? formattedNum(token1.derivedETH / token0.derivedETH)
       : '-'
 
@@ -196,7 +198,7 @@ function PairPage({ pairAddress, history }) {
   const [dismissed, markAsDismissed] = usePathDismissed(history.location.pathname)
 
   // TODO: Remove this when Cronos has a token list
-  const noWarning = process.env.REACT_APP_CHAIN_ID === '25'
+  const noWarning = networksInfo.CHAIN_ID === 25
 
   useEffect(() => {
     window.scrollTo({
@@ -208,6 +210,8 @@ function PairPage({ pairAddress, history }) {
   const [savedPairs, addPair, removePair] = useSavedPairs()
 
   const listedTokens = useListedTokens()
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   return (
     <PageWrapper>
@@ -227,7 +231,7 @@ function PairPage({ pairAddress, history }) {
       <ContentWrapperLarge>
         <RowBetween>
           <TYPE.body>
-            <BasicLink to="/pairs">{'Pairs '}</BasicLink>→ {token0?.symbol}-{token1?.symbol}
+            <BasicLink to={prefixNetworkURL + "/pairs"}>{'Pairs '}</BasicLink>→ {token0?.symbol}-{token1?.symbol}
           </TYPE.body>
           {!below600 && <Search small={true} />}
         </RowBetween>
@@ -250,9 +254,9 @@ function PairPage({ pairAddress, history }) {
                     <TYPE.main fontSize={below1080 ? '1.5rem' : '2rem'} style={{ margin: '0 1rem' }}>
                       {token0 && token1 ? (
                         <>
-                          <HoverSpan onClick={() => history.push(`/token/${token0?.id}`)}>{token0.symbol}</HoverSpan>
+                          <HoverSpan onClick={() => history.push(prefixNetworkURL + `/token/${token0?.id}`)}>{token0.symbol}</HoverSpan>
                           <span>-</span>
-                          <HoverSpan onClick={() => history.push(`/token/${token1?.id}`)}>
+                          <HoverSpan onClick={() => history.push(prefixNetworkURL + `/token/${token1?.id}`)}>
                             {token1.symbol}
                           </HoverSpan>{' '}
                           Pair
@@ -292,7 +296,7 @@ function PairPage({ pairAddress, history }) {
                     <ButtonOutlined style={{ padding: '11px 22px' }}>Choose pool to add liquidity</ButtonOutlined>
                   </LinkScroll>
 
-                  <Link external href={getSwapLink(token0?.id, token1?.id)}>
+                  <Link external href={getSwapLink(token0?.id, networksInfo, token1?.id)}>
                     <ButtonDark
                       ml={!below1080 && '.5rem'}
                       mr={below1080 && '.5rem'}
@@ -314,26 +318,24 @@ function PairPage({ pairAddress, history }) {
                 flexWrap: 'wrap',
               }}
             >
-              <FixedPanel onClick={() => history.push(`/token/${token0?.id}`)}>
+              <FixedPanel onClick={() => history.push(prefixNetworkURL + `/token/${token0?.id}`)}>
                 <RowFixed>
                   <TokenLogo address={token0?.id} size={'16px'} />
                   <TYPE.main fontSize={'16px'} lineHeight={1} fontWeight={500} ml={'4px'}>
                     {token0 && token1
-                      ? `1 ${formattedSymbol0} = ${token0Rate} ${formattedSymbol1} ${
-                          parseFloat(token0?.derivedETH) ? '(' + token0USD + ')' : ''
-                        }`
+                      ? `1 ${formattedSymbol0} = ${token0Rate} ${formattedSymbol1} ${parseFloat(token0?.derivedETH) ? '(' + token0USD + ')' : ''
+                      }`
                       : '-'}
                   </TYPE.main>
                 </RowFixed>
               </FixedPanel>
-              <FixedPanel onClick={() => history.push(`/token/${token1?.id}`)}>
+              <FixedPanel onClick={() => history.push(prefixNetworkURL + `/token/${token1?.id}`)}>
                 <RowFixed>
                   <TokenLogo address={token1?.id} size={'16px'} />
                   <TYPE.main fontSize={'16px'} lineHeight={1} fontWeight={500} ml={'4px'}>
                     {token0 && token1
-                      ? `1 ${formattedSymbol1} = ${token1Rate} ${formattedSymbol0}  ${
-                          parseFloat(token1?.derivedETH) ? '(' + token1USD + ')' : ''
-                        }`
+                      ? `1 ${formattedSymbol1} = ${token1Rate} ${formattedSymbol0}  ${parseFloat(token1?.derivedETH) ? '(' + token1USD + ')' : ''
+                      }`
                       : '-'}
                   </TYPE.main>
                 </RowFixed>
@@ -391,7 +393,7 @@ function PairPage({ pairAddress, history }) {
                       <TYPE.main>Pooled Tokens</TYPE.main>
                       <div />
                     </RowBetween>
-                    <Hover onClick={() => history.push(`/token/${token0?.id}`)} fade={true}>
+                    <Hover onClick={() => history.push(prefixNetworkURL + `/token/${token0?.id}`)} fade={true}>
                       <AutoRow gap="4px">
                         <TokenLogo address={token0?.id} />
                         <TYPE.main fontSize={20} lineHeight={1} fontWeight={500}>
@@ -402,7 +404,7 @@ function PairPage({ pairAddress, history }) {
                         </TYPE.main>
                       </AutoRow>
                     </Hover>
-                    <Hover onClick={() => history.push(`/token/${token1?.id}`)} fade={true}>
+                    <Hover onClick={() => history.push(prefixNetworkURL + `/token/${token1?.id}`)} fade={true}>
                       <AutoRow gap="4px">
                         <TokenLogo address={token1?.id} />
                         <TYPE.main fontSize={20} lineHeight={1} fontWeight={500}>

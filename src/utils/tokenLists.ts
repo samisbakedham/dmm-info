@@ -32,7 +32,7 @@ const tokenListValidator = new Ajv({ allErrors: true }).compile(schema)
  * Contains the logic for resolving a list URL to a validated token list
  * @param listUrl list url
  */
-export default async function getTokenList(listUrl: string): Promise<TokenList> {
+export default async function getTokenList(listUrl: string, networkInfo): Promise<TokenList> {
   const urls = uriToHttp(listUrl)
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i]
@@ -55,7 +55,7 @@ export default async function getTokenList(listUrl: string): Promise<TokenList> 
 
     // Bypass validator for Matic network
     // Because the Uniswap token schema will fail on Quickswap tokens list
-    if (['137', '56', '43114', '250', '25'].includes(String(process.env.REACT_APP_CHAIN_ID))) {
+    if ([137, 56, 43114, 250, 25].includes(networkInfo.CHAIN_ID)) {
       return json
     }
 

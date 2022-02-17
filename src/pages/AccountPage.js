@@ -24,6 +24,8 @@ import { formattedNum, getEtherscanLinkText } from '../utils'
 import { useOnClickOutside } from '../hooks'
 import useTheme from '../hooks/useTheme'
 import { Flex, Text } from 'rebass'
+import { useNetworksInfo } from '../contexts/NetworkInfo'
+import { useParams } from 'react-router-dom'
 
 const AccountWrapper = styled.div`
   padding: 6px 16px 6px 0;
@@ -93,19 +95,22 @@ const Warning = styled.div`
 `
 
 function AccountPage({ account }) {
+  const [networksInfo] = useNetworksInfo()
   // get data for this account
   const transactions = useUserTransactions(account)
   const positions = useUserPositions(account)
 
   // get data for user stats
   const transactionCount = transactions?.swaps?.length + transactions?.burns?.length + transactions?.mints?.length
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   // get derived totals
   let totalSwappedUSD = useMemo(() => {
     return transactions?.swaps
       ? transactions?.swaps.reduce((total, swap) => {
-          return total + parseFloat(swap.amountUSD)
-        }, 0)
+        return total + parseFloat(swap.amountUSD)
+      }, 0)
       : 0
   }, [transactions])
 
@@ -142,12 +147,12 @@ function AccountPage({ account }) {
   const positionValue = useMemo(() => {
     return dynamicPositions
       ? dynamicPositions.reduce((total, position) => {
-          return (
-            total +
-            (parseFloat(position?.liquidityTokenBalance) / parseFloat(position?.pool?.totalSupply)) *
-              position?.pool?.reserveUSD
-          )
-        }, 0)
+        return (
+          total +
+          (parseFloat(position?.liquidityTokenBalance) / parseFloat(position?.pool?.totalSupply)) *
+          position?.pool?.reserveUSD
+        )
+      }, 0)
       : null
   }, [dynamicPositions])
 
@@ -164,7 +169,7 @@ function AccountPage({ account }) {
   const [savedAccounts, addAccount, removeAccount] = useSavedAccounts()
   const isBookmarked = savedAccounts.includes(account)
   const handleBookmarkClick = useCallback(() => {
-    ;(isBookmarked ? removeAccount : addAccount)(account)
+    ; (isBookmarked ? removeAccount : addAccount)(account)
   }, [account, isBookmarked, addAccount, removeAccount])
 
   return (
@@ -172,10 +177,10 @@ function AccountPage({ account }) {
       <ContentWrapper>
         <RowBetween>
           <TYPE.body>
-            <BasicLink to="/accounts">{'Accounts '}</BasicLink>→{' '}
+            <BasicLink to={prefixNetworkURL + "/accounts"}>{'Accounts '}</BasicLink>→{' '}
             <Link
               lineHeight={'145.23%'}
-              href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${account}`}
+              href={`${networksInfo.ETHERSCAN_URL}/address/${account}`}
               target="_blank"
             >
               {account?.slice(0, 42)}
@@ -203,11 +208,11 @@ function AccountPage({ account }) {
               )}
               <Link
                 lineHeight={'145.23%'}
-                href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${account}`}
+                href={`${networksInfo.ETHERSCAN_URL}/address/${account}`}
                 target="_blank"
               >
                 <ButtonDark>
-                  <Text fontSize={14}>{`View on ${getEtherscanLinkText()}`}↗</Text>
+                  <Text fontSize={14}>{`View on ${getEtherscanLinkText(networksInfo)}`}↗</Text>
                 </ButtonDark>
               </Link>
             </AccountWrapper>
@@ -300,8 +305,8 @@ function AccountPage({ account }) {
                       {positionValue
                         ? formattedNum(positionValue, true)
                         : positionValue === 0
-                        ? formattedNum(0, true)
-                        : '-'}
+                          ? formattedNum(0, true)
+                          : '-'}
                     </TYPE.header>
                   </RowFixed>
                 </AutoColumn>

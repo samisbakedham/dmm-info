@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc'
 import { useEthPrice } from './GlobalData'
 import { getLPReturnsOnPair, getHistoricalPairReturns } from '../utils/returns'
 import { timeframeOptions } from '../constants'
+import { useNetworksInfo } from './NetworkInfo'
 
 dayjs.extend(utc)
 
@@ -145,6 +146,7 @@ export function useUserTransactions(account) {
   const [state, { updateTransactions }] = useUserContext()
   const transactions = state?.[account]?.[TRANSACTIONS_KEY]
   useEffect(() => {
+    let canceled = false
     async function fetchData(account) {
       try {
         let result = await exchangeSubgraphClient.query({
@@ -154,7 +156,7 @@ export function useUserTransactions(account) {
           },
           fetchPolicy: 'no-cache',
         })
-        if (result?.data) {
+        if (!canceled && result?.data) {
           updateTransactions(account, result?.data)
         }
       } catch (e) {
@@ -164,6 +166,7 @@ export function useUserTransactions(account) {
     if (!transactions && account) {
       fetchData(account)
     }
+    return () => canceled = true
   }, [account, transactions, updateTransactions, exchangeSubgraphClient])
 
   return transactions || {}
@@ -228,6 +231,7 @@ export function useUserPositionChart(position, account) {
   const exchangeSubgraphClient = useExchangeClient()
   const pairAddress = position?.pair?.id
   const [state, { updateUserPairReturns }] = useUserContext()
+  const [networksInfo] = useNetworksInfo()
 
   // get oldest date of data to fetch
   const startDateTimestamp = useStartTimestamp()
@@ -249,15 +253,17 @@ export function useUserPositionChart(position, account) {
   const formattedHistory = state?.[account]?.[USER_PAIR_RETURNS_KEY]?.[pairAddress]
 
   useEffect(() => {
+    let canceled = false
     async function fetchData() {
       let fetchedData = await getHistoricalPairReturns(
         exchangeSubgraphClient,
         startDateTimestamp,
         currentPairData,
         pairSnapshots,
-        currentETHPrice
+        currentETHPrice,
+        networksInfo,
       )
-      updateUserPairReturns(account, pairAddress, fetchedData)
+      !canceled && updateUserPairReturns(account, pairAddress, fetchedData)
     }
     if (
       account &&
@@ -271,6 +277,7 @@ export function useUserPositionChart(position, account) {
     ) {
       fetchData()
     }
+    return () => canceled = true
   }, [
     account,
     startDateTimestamp,
@@ -282,6 +289,7 @@ export function useUserPositionChart(position, account) {
     updateUserPairReturns,
     position.pair.id,
     exchangeSubgraphClient,
+    networksInfo,
   ])
 
   return formattedHistory
@@ -324,6 +332,7 @@ export function useUserLiquidityChart(account) {
   }, [activeWindow, startDateTimestamp])
 
   useEffect(() => {
+    let canceled = false
     async function fetchData() {
       let dayIndex = parseInt(startDateTimestamp / 86400) // get unique day bucket unix
       const currentDayIndex = parseInt(dayjs.utc().unix() / 86400)
@@ -354,6 +363,7 @@ export function useUserLiquidityChart(account) {
       } = await exchangeSubgraphClient.query({
         query: PAIR_DAY_DATA_BULK(pairs, startDateTimestamp),
       })
+      if (canceled) return
 
       const formattedHistory = []
 
@@ -408,7 +418,7 @@ export function useUserLiquidityChart(account) {
               totalUSD +
               (ownershipPerPair[dayData.pairAddress]
                 ? (parseFloat(ownershipPerPair[dayData.pairAddress].lpTokenBalance) / parseFloat(dayData.totalSupply)) *
-                  parseFloat(dayData.reserveUSD)
+                parseFloat(dayData.reserveUSD)
                 : 0))
           } else {
             return totalUSD
@@ -426,6 +436,7 @@ export function useUserLiquidityChart(account) {
     if (history && startDateTimestamp && history.length > 0) {
       fetchData()
     }
+    return () => canceled = true
   }, [history, startDateTimestamp, exchangeSubgraphClient])
 
   return formattedHistory
@@ -438,8 +449,10 @@ export function useUserPositions(account) {
 
   const snapshots = useUserSnapshots(account)
   const [ethPrice] = useEthPrice()
+  const [networksInfo] = useNetworksInfo()
 
   useEffect(() => {
+    let canceled = false
     async function fetchData(account) {
       try {
         let result = await exchangeSubgraphClient.query({
@@ -449,6 +462,7 @@ export function useUserPositions(account) {
           },
           fetchPolicy: 'no-cache',
         })
+        if (canceled) return
         if (result?.data?.liquidityPositions) {
           let formattedPositions = await Promise.all(
             result?.data?.liquidityPositions.map(async (positionData) => {
@@ -457,7 +471,8 @@ export function useUserPositions(account) {
                 account,
                 positionData.pair,
                 ethPrice,
-                snapshots
+                snapshots,
+                networksInfo,
               )
               return {
                 ...positionData,
@@ -465,7 +480,7 @@ export function useUserPositions(account) {
               }
             })
           )
-          updatePositions(account, formattedPositions)
+          !canceled && updatePositions(account, formattedPositions)
         }
       } catch (e) {
         console.log(e)
@@ -474,7 +489,8 @@ export function useUserPositions(account) {
     if (!positions && account && ethPrice && snapshots) {
       fetchData(account)
     }
-  }, [account, positions, updatePositions, ethPrice, snapshots, exchangeSubgraphClient])
+    return () => canceled = true
+  }, [account, positions, updatePositions, ethPrice, snapshots, exchangeSubgraphClient, networksInfo])
 
   return positions
 }

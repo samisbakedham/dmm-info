@@ -8,7 +8,7 @@ import styled from 'styled-components'
 
 import { CustomLink } from '../Link'
 import { Divider } from '..'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import { formattedNum, shortenAddress } from '../../utils'
 import { TYPE } from '../../Theme'
 import DoubleTokenLogo from '../DoubleLogo'
@@ -91,6 +91,8 @@ function LPList({ lps, disbaleLinks, maxItems = 10 }) {
   const [page, setPage] = useState(1)
   const [maxPage, setMaxPage] = useState(1)
   const ITEMS_PER_PAGE = maxItems
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   useEffect(() => {
     setMaxPage(1) // edit this to do modular
@@ -123,7 +125,7 @@ function LPList({ lps, disbaleLinks, maxItems = 10 }) {
               textOverflow: 'ellipsis',
               overflow: 'hidden',
             }}
-            to={'/account/' + lp.user.id}
+            to={prefixNetworkURL + '/account/' + lp.user.id}
           >
             {below800 ? lp.user.id.slice(0, 5) + '...' + lp.user.id.slice(39, 42) : lp.user.id}
           </CustomLink>
@@ -137,7 +139,7 @@ function LPList({ lps, disbaleLinks, maxItems = 10 }) {
 
         {!below600 && (
           <DataText>
-            <CustomLink area="pair" to={'/pair/' + lp.pairAddress}>
+            <CustomLink area="pair" to={prefixNetworkURL + '/pair/' + lp.pairAddress}>
               <RowFixed>
                 {!below600 && <DoubleTokenLogo a0={lp.token0} a1={lp.token1} size={16} margin={true} />}
                 {lp.pairName}
@@ -147,7 +149,7 @@ function LPList({ lps, disbaleLinks, maxItems = 10 }) {
         )}
 
         <DataText>
-          <CustomLink area="pool" to={'/pool/' + lp.poolAddress}>
+          <CustomLink area="pool" to={prefixNetworkURL + '/pool/' + lp.poolAddress}>
             <RowFixed>{shortenAddress(lp.poolAddress, 3)}</RowFixed>
           </CustomLink>
         </DataText>

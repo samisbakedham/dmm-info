@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useReducer, useMemo, useCallback, useState, useEffect } from 'react'
-import { timeframeOptions, SUPPORTED_LIST_URLS__NO_ENS, KNC_ADDRESS } from '../constants'
+import { timeframeOptions, getSUPPORTED_LIST_URLS__NO_ENS, getKNC_ADDRESS } from '../constants'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import getTokenList from '../utils/tokenLists'
-import { client, healthClient } from '../apollo/client'
+import { healthClient, useClient } from '../apollo/client'
 import { SUBGRAPH_HEALTH, SUBGRAPH_BLOCK_NUMBER } from '../apollo/queries'
-import { getExchangeSubgraphClient } from '../apollo/manager'
+import { useNetworksInfo } from './NetworkInfo'
+import { ApolloClient } from 'apollo-client'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import { HttpLink } from 'apollo-link-http'
+
 dayjs.extend(utc)
 
 const UPDATE = 'UPDATE'
@@ -57,18 +61,22 @@ function reducer(state, { type, payload }) {
     }
 
     case UPDATE_LATEST_BLOCK: {
-      const { block } = payload
+      const { block, chainId } = payload
       return {
         ...state,
-        [LATEST_BLOCK]: block,
+        [LATEST_BLOCK]: {
+          [chainId]: block,
+        },
       }
     }
 
     case UPDATE_HEAD_BLOCK: {
-      const { block } = payload
+      const { block, chainId } = payload
       return {
         ...state,
-        [HEAD_BLOCK]: block,
+        [HEAD_BLOCK]: {
+          [chainId]: block,
+        },
       }
     }
 
@@ -89,10 +97,12 @@ function reducer(state, { type, payload }) {
     }
 
     case UPDATE_EXCHANGE_SUBGRAPH_CLIENT: {
-      const { exchangeSubgraphClient } = payload
+      const { exchangeSubgraphClient, chainId } = payload
       return {
         ...state,
-        [EXCHANGE_SUBGRAPH_CLIENT]: exchangeSubgraphClient,
+        [EXCHANGE_SUBGRAPH_CLIENT]: {
+          [chainId]: exchangeSubgraphClient,
+        }
       }
     }
 
@@ -106,7 +116,7 @@ const INITIAL_STATE = {
   CURRENCY: 'USD',
   TIME_KEY: timeframeOptions.ALL_TIME,
   OPEN_MODAL: null,
-  EXCHANGE_SUBGRAPH_CLIENT: null,
+  EXCHANGE_SUBGRAPH_CLIENT: {},
 }
 
 export default function Provider({ children }) {
@@ -149,20 +159,22 @@ export default function Provider({ children }) {
     })
   }, [])
 
-  const updateLatestBlock = useCallback((block) => {
+  const updateLatestBlock = useCallback((block, chainId) => {
     dispatch({
       type: UPDATE_LATEST_BLOCK,
       payload: {
         block,
+        chainId
       },
     })
   }, [])
 
-  const updateHeadBlock = useCallback((block) => {
+  const updateHeadBlock = useCallback((block, chainId) => {
     dispatch({
       type: UPDATE_HEAD_BLOCK,
       payload: {
         block,
+        chainId,
       },
     })
   }, [])
@@ -176,11 +188,12 @@ export default function Provider({ children }) {
     })
   }, [])
 
-  const updateExchangeSubgraphClient = useCallback((exchangeSubgraphClient) => {
+  const updateExchangeSubgraphClient = useCallback((exchangeSubgraphClient, chainId) => {
     dispatch({
       type: UPDATE_EXCHANGE_SUBGRAPH_CLIENT,
       payload: {
         exchangeSubgraphClient,
+        chainId,
       },
     })
   }, [])
@@ -221,21 +234,22 @@ export default function Provider({ children }) {
 
 export function useLatestBlocks() {
   const [state, { updateLatestBlock, updateHeadBlock }] = useApplicationContext()
-
-  const latestBlock = state?.[LATEST_BLOCK]
-  const headBlock = state?.[HEAD_BLOCK]
+  const [networksInfo] = useNetworksInfo()
+  const client = useClient()
+  const latestBlock = state?.[LATEST_BLOCK]?.[networksInfo.CHAIN_ID]
+  const headBlock = state?.[HEAD_BLOCK]?.[networksInfo.CHAIN_ID]
 
   useEffect(() => {
     async function fetch() {
       try {
         const res = await healthClient.query({
-          query: SUBGRAPH_HEALTH(process.env.REACT_APP_SUBGRAPH_NAME),
+          query: SUBGRAPH_HEALTH(networksInfo.SUBGRAPH_NAME),
         })
         const syncedBlock = res.data.indexingStatusForCurrentVersion.chains[0].latestBlock.number
         const headBlock = res.data.indexingStatusForCurrentVersion.chains[0].chainHeadBlock.number
         if (syncedBlock && headBlock) {
-          updateLatestBlock(syncedBlock)
-          updateHeadBlock(headBlock)
+          updateLatestBlock(syncedBlock, networksInfo.CHAIN_ID)
+          updateHeadBlock(headBlock, networksInfo.CHAIN_ID)
         }
       } catch (e) {
         console.log('Can not fetch from health client, fetch from exchange client instead ...')
@@ -246,8 +260,8 @@ export function useLatestBlocks() {
         const latestBlock = res.data._meta.block.number
 
         if (latestBlock) {
-          updateLatestBlock(latestBlock)
-          updateHeadBlock(latestBlock)
+          updateLatestBlock(latestBlock, networksInfo.CHAIN_ID)
+          updateHeadBlock(latestBlock, networksInfo.CHAIN_ID)
         } else {
           console.error(e)
         }
@@ -256,7 +270,7 @@ export function useLatestBlocks() {
     if (!latestBlock) {
       fetch()
     }
-  }, [latestBlock, updateHeadBlock, updateLatestBlock])
+  }, [latestBlock, updateHeadBlock, updateLatestBlock, networksInfo.SUBGRAPH_NAME, networksInfo.CHAIN_ID, client])
 
   return [latestBlock, headBlock]
 }
@@ -329,22 +343,23 @@ export function useSessionStart() {
 export function useListedTokens() {
   const [state, { updateSupportedTokens }] = useApplicationContext()
   const supportedTokens = state?.[SUPPORTED_TOKENS]
+  const [networksInfo] = useNetworksInfo()
 
   useEffect(() => {
     async function fetchList() {
-      const allFetched = await SUPPORTED_LIST_URLS__NO_ENS.reduce(async (fetchedTokens, url) => {
+      const allFetched = await getSUPPORTED_LIST_URLS__NO_ENS(networksInfo).reduce(async (fetchedTokens, url) => {
         const tokensSoFar = await fetchedTokens
-        const newTokens = await getTokenList(url)
+        const newTokens = await getTokenList(url, networksInfo)
         return Promise.resolve([...tokensSoFar, ...newTokens.tokens])
       }, Promise.resolve([]))
       let formatted = allFetched?.map((t) => t.address.toLowerCase())
-      formatted.push(KNC_ADDRESS.toLowerCase())
+      formatted.push(getKNC_ADDRESS(networksInfo).toLowerCase())
       updateSupportedTokens(formatted)
     }
     if (!supportedTokens) {
       fetchList()
     }
-  }, [updateSupportedTokens, supportedTokens])
+  }, [updateSupportedTokens, supportedTokens, networksInfo])
 
   return supportedTokens
 }
@@ -379,16 +394,72 @@ export function useToggleNetworkModal() {
 
 export function useExchangeClient() {
   const [state, { updateExchangeSubgraphClient }] = useApplicationContext()
-  const exchangeSubgraphClient = state?.[EXCHANGE_SUBGRAPH_CLIENT]
-  const chainId = parseInt(process.env.REACT_APP_CHAIN_ID)
+  const [networksInfo] = useNetworksInfo()
+  const client = useClient()
+  const exchangeSubgraphClient = state?.[EXCHANGE_SUBGRAPH_CLIENT][networksInfo.CHAIN_ID]
 
   useEffect(() => {
+    async function getExchangeSubgraphClient() {
+      const subgraphUrls = networksInfo?.SUBGRAPH_URL
+
+      if (subgraphUrls.length === 1) {
+        return new ApolloClient({
+          link: new HttpLink({
+            uri: subgraphUrls[0],
+          }),
+          cache: new InMemoryCache(),
+          shouldBatch: true,
+        })
+      }
+
+      const subgraphClients = subgraphUrls.map(
+        (uri) =>
+          new ApolloClient({
+            link: new HttpLink({
+              uri,
+            }),
+            cache: new InMemoryCache(),
+            shouldBatch: true,
+          })
+      )
+
+      const subgraphPromises = subgraphClients.map((client) =>
+        client
+          .query({
+            query: SUBGRAPH_BLOCK_NUMBER(),
+            fetchPolicy: 'network-only',
+          })
+          .catch((e) => {
+            console.error(e)
+            return e
+          })
+      )
+
+      const subgraphQueryResults = await Promise.all(subgraphPromises)
+
+      const subgraphBlockNumbers = subgraphQueryResults.map((res) =>
+        res instanceof Error ? 0 : res?.data?._meta?.block?.number || 0
+      )
+
+      let bestIndex = 0
+      let maxBlockNumber = 0
+
+      for (let i = 0; i < subgraphClients.length; i += 1) {
+        if (subgraphBlockNumbers[i] > maxBlockNumber) {
+          maxBlockNumber = subgraphBlockNumbers[i]
+          bestIndex = i
+        }
+      }
+
+      return subgraphClients[bestIndex]
+    }
+
     async function fetchExchangeClient() {
       try {
-        const client = await getExchangeSubgraphClient(chainId)
+        const client = await getExchangeSubgraphClient()
 
         if (client) {
-          updateExchangeSubgraphClient(client)
+          updateExchangeSubgraphClient(client, networksInfo.CHAIN_ID)
         }
       } catch (err) {
         console.error(err)
@@ -398,7 +469,7 @@ export function useExchangeClient() {
     if (!exchangeSubgraphClient) {
       fetchExchangeClient()
     }
-  }, [chainId, exchangeSubgraphClient, updateExchangeSubgraphClient])
+  }, [networksInfo, exchangeSubgraphClient, updateExchangeSubgraphClient])
 
   return exchangeSubgraphClient || client
 }

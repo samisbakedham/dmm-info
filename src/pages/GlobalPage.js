@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { AutoRow, RowBetween } from '../components/Row'
@@ -58,6 +58,8 @@ function GlobalPage() {
   const allTokens = useAllTokenData()
   const transactions = useGlobalTransactions()
   const theme = useTheme()
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   // breakpoints
   const below800 = useMedia('(max-width: 800px)')
@@ -98,7 +100,7 @@ function GlobalPage() {
           <ListOptions gap="10px" style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
             <RowBetween>
               <TYPE.main fontSize={'1.125rem'}>Top Tokens</TYPE.main>
-              <CustomLink to={'/tokens'}>See All</CustomLink>
+              <CustomLink to={prefixNetworkURL + '/tokens'}>See All</CustomLink>
             </RowBetween>
           </ListOptions>
           <WrappedPanel style={{ marginTop: '6px' }}>
@@ -107,7 +109,7 @@ function GlobalPage() {
           <ListOptions gap="10px" style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
             <RowBetween>
               <TYPE.main fontSize={'1rem'}>Top Pairs</TYPE.main>
-              <CustomLink to={'/pairs'}>See All</CustomLink>
+              <CustomLink to={prefixNetworkURL + '/pairs'}>See All</CustomLink>
             </RowBetween>
           </ListOptions>
           <WrappedPanel style={{ marginTop: '6px' }}>

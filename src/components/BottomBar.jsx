@@ -12,6 +12,8 @@ import Wallet from './Icons/Wallet'
 import ThemeToggle from './ThemeToggle'
 import SocialLinks from './SocialLinks'
 import Link, { BasicLink } from './Link'
+import { useNetworksInfo } from '../contexts/NetworkInfo'
+import { useParams } from 'react-router-dom'
 
 const Wrapper = styled.div`
   position: fixed;
@@ -71,11 +73,14 @@ const Divider = styled.div`
 function BottomBar() {
   const seconds = useSessionStart()
   const theme = useTheme()
+  const [networksInfo] = useNetworksInfo()
 
   const node = useRef()
   const menuModalOpen = useModalOpen(ApplicationModal.MENU)
   const toggleMenuModal = useToggleMenuModal()
   useOnClickOutside(node, menuModalOpen ? toggleMenuModal : undefined)
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   return (
     <Wrapper ref={node}>
@@ -98,14 +103,14 @@ function BottomBar() {
 
       {menuModalOpen && (
         <MenuFlyout>
-          <BasicLink to="/accounts" onClick={() => toggleMenuModal()}>
+          <BasicLink to={prefixNetworkURL + "/accounts"} onClick={() => toggleMenuModal()}>
             <Flex color={theme.subText} alignItems="center">
               <Wallet />
               <Text marginLeft="8px"> Wallet Analytics</Text>
             </Flex>
           </BasicLink>
           <Divider />
-          <Link href={process.env.REACT_APP_DMM_SWAP_URL} external onClick={() => toggleMenuModal()}>
+          <Link href={networksInfo.DMM_SWAP_URL} external onClick={() => toggleMenuModal()}>
             <Flex color={theme.subText} alignItems="center">
               <Repeat size={16} />
               <Text marginLeft="8px">Swap</Text>

@@ -11,6 +11,7 @@ import Link from '../Link'
 import { useMedia } from 'react-use'
 import { getNetworkName, getEtherscanLinkText } from '../../utils'
 import useTheme from '../../hooks/useTheme'
+import { useNetworksInfo } from '../../contexts/NetworkInfo'
 
 const WarningWrapper = styled.div`
   border-radius: 8px;
@@ -36,23 +37,24 @@ const StyledWarningIcon = styled(AlertTriangle)`
 `
 
 export default function Warning({ type, show, setShow, address }) {
+  const [networksInfo] = useNetworksInfo()
   const below800 = useMedia('(max-width: 800px)')
 
   const textContent = below800 ? (
     <div>
       <Text fontSize={14} fontWeight={500} lineHeight={'155.23%'} mt={'10px'} lineSpacing={'normal'}>
-        Anyone can create and name any ERC20 token on {getNetworkName()}, including creating fake versions of existing
+        Anyone can create and name any ERC20 token on {getNetworkName(networksInfo)}, including creating fake versions of existing
         tokens that claim to represent projects that do not have a token.
       </Text>
       <Text fontSize={14} fontWeight={500} lineHeight={'155.23%'} mt={'10px'}>
-        Similar to {getEtherscanLinkText()}, this site automatically tracks analytics for all ERC20 tokens independent
+        Similar to {getEtherscanLinkText(networksInfo)}, this site automatically tracks analytics for all ERC20 tokens independent
         of token integrity. Please do your own research before interacting with any ERC20 token.
       </Text>
     </div>
   ) : (
     <Text fontSize={14} fontWeight={500} lineHeight={'155.23%'} mt={'10px'} lineSpacing={'normal'}>
-      Anyone can create and name any ERC20 token on {getNetworkName()}, including creating fake versions of existing
-      tokens that claim to represent projects that do not have a token. Similar to {getEtherscanLinkText()}, this site
+      Anyone can create and name any ERC20 token on {getNetworkName(networksInfo)}, including creating fake versions of existing
+      tokens that claim to represent projects that do not have a token. Similar to {getEtherscanLinkText(networksInfo)}, this site
       automatically tracks analytics for all ERC20 tokens independent of token integrity. Please do your own research
       before interacting with any ERC20 token.
     </Text>
@@ -80,10 +82,10 @@ export default function Warning({ type, show, setShow, address }) {
                 <Link
                   lineHeight={'145.23%'}
                   color={theme.primary}
-                  href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${address}`}
+                  href={`${networksInfo.ETHERSCAN_URL}/address/${address}`}
                   target="_blank"
                 >
-                  View {contractTypeLabel} contract on {getEtherscanLinkText()}
+                  View {contractTypeLabel} contract on {getEtherscanLinkText(networksInfo)}
                 </Link>
               </Hover>
             )}
@@ -103,10 +105,10 @@ export default function Warning({ type, show, setShow, address }) {
                 <Link
                   lineHeight={'145.23%'}
                   color={theme.primary}
-                  href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${address}`}
+                  href={`${networksInfo.ETHERSCAN_URL}/address/${address}`}
                   target="_blank"
                 >
-                  View {contractTypeLabel} contract on {getEtherscanLinkText()}
+                  View {contractTypeLabel} contract on {getEtherscanLinkText(networksInfo)}
                 </Link>
               </Hover>
             )}

@@ -7,6 +7,7 @@ import { ButtonOutlined } from '../ButtonStyled'
 import { useToggleNetworkModal } from '../../contexts/Application'
 import SwitchNetworkIcon from '../../assets/networks/switch-network.svg'
 import { useMedia } from 'react-use'
+import { useNetworksInfo } from '../../contexts/NetworkInfo'
 
 const ButtonWrapper = styled(ButtonOutlined)`
   width: 100%;
@@ -37,18 +38,11 @@ const NetworkLabel = styled.div`
 `
 
 const SwitchNetworkButton = () => {
-  const chainId = parseInt(process.env.REACT_APP_CHAIN_ID)
+  const [networksInfo] = useNetworksInfo()
+  const chainId = parseInt(networksInfo.CHAIN_ID)
 
   const toggleNetworkModal = useToggleNetworkModal()
   const below576 = useMedia('(max-width: 576px)')
-
-  if (
-    ![ChainId.MAINNET, ChainId.MATIC, ChainId.BSCMAINNET, ChainId.AVAXMAINNET, ChainId.FANTOM, ChainId.CRONOS].includes(
-      chainId
-    )
-  ) {
-    return null
-  }
 
   return (
     <ButtonWrapper onClick={toggleNetworkModal}>

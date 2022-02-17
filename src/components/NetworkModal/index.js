@@ -1,13 +1,14 @@
 import React, { useRef } from 'react'
 import styled from 'styled-components'
 
-import { NETWORK_ICON, NETWORK_LABEL } from '../../constants/networks'
+import { NETWORK_ICON } from '../../constants/networks'
 import { ApplicationModal, useModalOpen, useToggleNetworkModal } from '../../contexts/Application'
 import Modal from '../Modal'
 import ModalHeader from '../ModalHeader'
 import { ButtonEmpty } from '../ButtonStyled'
-import { ANALYTICS_URLS, ChainId } from '../../constants'
 import { useOnClickOutside } from '../../hooks'
+import { NetworksInfoEnv, useNetworksInfo } from '../../contexts/NetworkInfo'
+import { useHistory, useParams } from 'react-router-dom'
 
 const ModalContentWrapper = styled.div`
   display: flex;
@@ -80,36 +81,29 @@ const SelectNetworkButton = styled(ButtonEmpty)`
 `
 
 export default function NetworkModal() {
-  const chainId = parseInt(process.env.REACT_APP_CHAIN_ID)
+  const [networksInfo] = useNetworksInfo()
   const networkModalOpen = useModalOpen(ApplicationModal.NETWORK)
   const toggleNetworkModal = useToggleNetworkModal()
   const node = useRef()
   useOnClickOutside(node, networkModalOpen ? toggleNetworkModal : undefined)
-
-  if (!chainId) return null
+  const history = useHistory()
+  const { network: currentNetworkURL } = useParams()
 
   return (
     <Modal isOpen={networkModalOpen} onDismiss={toggleNetworkModal}>
       <ModalContentWrapper ref={node}>
         <ModalHeader onClose={toggleNetworkModal} title="Select a Network" />
 
-        <InstructionText>You are currently on {NETWORK_LABEL[chainId]} Analytics page. Switch network?</InstructionText>
+        <InstructionText>You are currently on {networksInfo.NAME} Analytics page. Switch network?</InstructionText>
 
         <NetworkList>
-          {[
-            ChainId.MAINNET,
-            ChainId.MATIC,
-            ChainId.BSCMAINNET,
-            ChainId.AVAXMAINNET,
-            ChainId.FANTOM,
-            ChainId.CRONOS,
-          ].map((key, i) => {
-            if (chainId === key) {
+          {NetworksInfoEnv.map((network, index) => {
+            if (networksInfo.ENV_KEY === network.ENV_KEY) {
               return (
-                <SelectNetworkButton key={i} padding="0">
+                <SelectNetworkButton key={index} padding="0">
                   <ListItem selected>
-                    <img src={NETWORK_ICON[key]} alt="Switch Network" style={{ width: '2rem', marginRight: '1rem' }} />
-                    <NetworkLabel>{NETWORK_LABEL[key]}</NetworkLabel>
+                    <img src={NETWORK_ICON[network.CHAIN_ID]} alt="Switch Network" style={{ width: '2rem', marginRight: '1rem' }} />
+                    <NetworkLabel>{network.NAME}</NetworkLabel>
                   </ListItem>
                 </SelectNetworkButton>
               )
@@ -117,16 +111,20 @@ export default function NetworkModal() {
 
             return (
               <SelectNetworkButton
-                key={i}
+                key={index}
                 padding="0"
                 onClick={() => {
                   toggleNetworkModal()
-                  window.location.href = ANALYTICS_URLS[key]
+                  const currentUrl = currentNetworkURL
+                    ? history.location.pathname.split('/').slice(2).join('/')
+                    : history.location.pathname.split('/').slice(1).join('/')
+                  const redirectURL = `/${network.URL_KEY}/` + currentUrl
+                  history.push(redirectURL)
                 }}
               >
                 <ListItem>
-                  <img src={NETWORK_ICON[key]} alt="Switch Network" style={{ width: '2rem', marginRight: '1rem' }} />
-                  <NetworkLabel>{NETWORK_LABEL[key]}</NetworkLabel>
+                  <img src={NETWORK_ICON[network.CHAIN_ID]} alt="Switch Network" style={{ width: '2rem', marginRight: '1rem' }} />
+                  <NetworkLabel>{network.NAME}</NetworkLabel>
                 </ListItem>
               </SelectNetworkButton>
             )

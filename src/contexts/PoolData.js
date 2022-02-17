@@ -19,21 +19,21 @@ import {
   getPercentChange,
   get2DayPercentChange,
   isAddress,
-  // getBlocksFromTimestamps,
+  getBlocksFromTimestamps,
   getTimestampsForChanges,
   splitQuery,
 } from '../utils'
-import { getBlocksFromTimestamps } from '../utils'
-// import { getBlockFromTimestamp, getBlocksFromTimestamps } from '../utils/mocks'
 
-import { timeframeOptions, WETH_ADDRESS } from '../constants'
+import { timeframeOptions, getWETH_ADDRESS } from '../constants'
 import { useExchangeClient, useLatestBlocks } from './Application'
 import { getNativeTokenSymbol, getNativeTokenWrappedName } from '../utils'
+import { useNetworksInfo } from './NetworkInfo'
 
 const UPDATE = 'UPDATE'
 const UPDATE_POOL_TXNS = 'UPDATE_POOL_TXNS'
 const UPDATE_CHART_DATA = 'UPDATE_CHART_DATA'
 const UPDATE_TOP_POOLS = 'UPDATE_TOP_POOLS'
+const CLEAR_TOP_POOLS = 'CLEAR_TOP_POOLS'
 const UPDATE_HOURLY_DATA = 'UPDATE_HOURLY_DATA'
 
 dayjs.extend(utc)
@@ -41,9 +41,9 @@ dayjs.extend(utc)
 export function safeAccess(object, path) {
   return object
     ? path.reduce(
-        (accumulator, currentValue) => (accumulator && accumulator[currentValue] ? accumulator[currentValue] : null),
-        object
-      )
+      (accumulator, currentValue) => (accumulator && accumulator[currentValue] ? accumulator[currentValue] : null),
+      object
+    )
     : null
 }
 
@@ -75,6 +75,11 @@ function reducer(state, { type, payload }) {
       return {
         ...state,
         ...added,
+      }
+    }
+
+    case CLEAR_TOP_POOLS: {
+      return {
       }
     }
 
@@ -142,6 +147,12 @@ export default function Provider({ children }) {
     })
   }, [])
 
+  const clearTopPools = useCallback(() => {
+    dispatch({
+      type: CLEAR_TOP_POOLS,
+    })
+  }, [])
+
   const updatePoolTxns = useCallback((address, transactions) => {
     dispatch({
       type: UPDATE_POOL_TXNS,
@@ -173,10 +184,11 @@ export default function Provider({ children }) {
             updatePoolTxns,
             updateChartData,
             updateTopPools,
+            clearTopPools,
             updateHourlyData,
           },
         ],
-        [state, update, updatePoolTxns, updateChartData, updateTopPools, updateHourlyData]
+        [state, update, updatePoolTxns, updateChartData, updateTopPools, clearTopPools, updateHourlyData]
       )}
     >
       {children}
@@ -184,9 +196,9 @@ export default function Provider({ children }) {
   )
 }
 
-export async function getBulkPoolData(client, poolList, ethPrice) {
+export async function getBulkPoolData(client, poolList, ethPrice, networksInfo) {
   const [t1, t2, tWeek] = getTimestampsForChanges()
-  let [{ number: b1 }, { number: b2 }, { number: bWeek }] = await getBlocksFromTimestamps([t1, t2, tWeek])
+  let [{ number: b1 }, { number: b2 }, { number: bWeek }] = await getBlocksFromTimestamps([t1, t2, tWeek], networksInfo)
 
   try {
     let current = await client.query({
@@ -221,35 +233,35 @@ export async function getBulkPoolData(client, poolList, ethPrice) {
 
     let poolData = await Promise.all(
       current &&
-        current.data.pools.map(async (pool) => {
-          let data = pool
-          let oneDayHistory = oneDayData?.[pool.id]
-          if (!oneDayHistory) {
-            let newData = await client.query({
-              query: POOL_DATA(pool.id, b1),
-              fetchPolicy: 'network-only',
-            })
-            oneDayHistory = newData.data.pools[0]
-          }
-          let twoDayHistory = twoDayData?.[pool.id]
-          if (!twoDayHistory) {
-            let newData = await client.query({
-              query: POOL_DATA(pool.id, b2),
-              fetchPolicy: 'network-only',
-            })
-            twoDayHistory = newData.data.pools[0]
-          }
-          let oneWeekHistory = oneWeekData?.[pool.id]
-          if (!oneWeekHistory) {
-            let newData = await client.query({
-              query: POOL_DATA(pool.id, bWeek),
-              fetchPolicy: 'network-only',
-            })
-            oneWeekHistory = newData.data.pools[0]
-          }
-          data = parseData(data, oneDayHistory, twoDayHistory, oneWeekHistory, ethPrice, b1)
-          return data
-        })
+      current.data.pools.map(async (pool) => {
+        let data = pool
+        let oneDayHistory = oneDayData?.[pool.id]
+        if (!oneDayHistory) {
+          let newData = await client.query({
+            query: POOL_DATA(pool.id, b1),
+            fetchPolicy: 'network-only',
+          })
+          oneDayHistory = newData.data.pools[0]
+        }
+        let twoDayHistory = twoDayData?.[pool.id]
+        if (!twoDayHistory) {
+          let newData = await client.query({
+            query: POOL_DATA(pool.id, b2),
+            fetchPolicy: 'network-only',
+          })
+          twoDayHistory = newData.data.pools[0]
+        }
+        let oneWeekHistory = oneWeekData?.[pool.id]
+        if (!oneWeekHistory) {
+          let newData = await client.query({
+            query: POOL_DATA(pool.id, bWeek),
+            fetchPolicy: 'network-only',
+          })
+          oneWeekHistory = newData.data.pools[0]
+        }
+        data = parseData(data, oneDayHistory, twoDayHistory, oneWeekHistory, ethPrice, b1, networksInfo)
+        return data
+      })
     )
 
     return poolData
@@ -258,7 +270,7 @@ export async function getBulkPoolData(client, poolList, ethPrice) {
   }
 }
 
-function parseData(data, oneDayData, twoDayData, oneWeekData, ethPrice, oneDayBlock) {
+function parseData(data, oneDayData, twoDayData, oneWeekData, ethPrice, oneDayBlock, networksInfo) {
   // get volume changes
   const [oneDayVolumeUSD, volumeChangeUSD] = get2DayPercentChange(
     data?.volumeUSD,
@@ -306,13 +318,13 @@ function parseData(data, oneDayData, twoDayData, oneWeekData, ethPrice, oneDayBl
   if (!oneWeekData && data) {
     data.oneWeekVolumeUSD = parseFloat(data.volumeUSD)
   }
-  if (data?.token0?.id === WETH_ADDRESS) {
-    data.token0.name = getNativeTokenWrappedName()
-    data.token0.symbol = getNativeTokenSymbol()
+  if (data?.token0?.id === getWETH_ADDRESS(networksInfo)) {
+    data.token0.name = getNativeTokenWrappedName(networksInfo)
+    data.token0.symbol = getNativeTokenSymbol(networksInfo)
   }
-  if (data?.token1?.id === WETH_ADDRESS) {
-    data.token1.name = getNativeTokenWrappedName()
-    data.token1.symbol = getNativeTokenSymbol()
+  if (data?.token1?.id === getWETH_ADDRESS(networksInfo)) {
+    data.token1.name = getNativeTokenWrappedName(networksInfo)
+    data.token1.symbol = getNativeTokenSymbol(networksInfo)
   }
 
   return data
@@ -406,7 +418,7 @@ const getPoolChartData = async (client, poolAddress) => {
   return data
 }
 
-const getHourlyRateData = async (client, poolAddress, startTime, latestBlock, frequency) => {
+const getHourlyRateData = async (client, poolAddress, startTime, latestBlock, frequency, networksInfo) => {
   try {
     const utcEndTime = dayjs.utc()
     let time = startTime
@@ -426,7 +438,7 @@ const getHourlyRateData = async (client, poolAddress, startTime, latestBlock, fr
     // once you have all the timestamps, get the blocks for each timestamp in a bulk query
     let blocks
 
-    blocks = await getBlocksFromTimestamps(timestamps, 100)
+    blocks = await getBlocksFromTimestamps(timestamps, networksInfo, 100)
 
     // catch failing case
     if (!blocks || blocks?.length === 0) {
@@ -480,9 +492,16 @@ const getHourlyRateData = async (client, poolAddress, startTime, latestBlock, fr
 
 export function Updater() {
   const exchangeSubgraphClient = useExchangeClient()
-  const [, { updateTopPools }] = usePoolDataContext()
+  const [, { updateTopPools, clearTopPools }] = usePoolDataContext()
   const [ethPrice] = useEthPrice()
+  const [networksInfo] = useNetworksInfo()
+
   useEffect(() => {
+    clearTopPools(null)
+  }, [networksInfo, exchangeSubgraphClient, clearTopPools])
+
+  useEffect(() => {
+    let canceled = false
     async function getData() {
       // get top pools by reserves
       let {
@@ -498,11 +517,12 @@ export function Updater() {
       })
 
       // get data for every pool in list
-      let topPools = await getBulkPoolData(exchangeSubgraphClient, formattedPools, ethPrice)
-      topPools && updateTopPools(topPools)
+      let topPools = await getBulkPoolData(exchangeSubgraphClient, formattedPools, ethPrice, networksInfo)
+      !canceled && topPools && updateTopPools(topPools)
     }
     ethPrice && getData()
-  }, [ethPrice, updateTopPools, exchangeSubgraphClient])
+    return () => canceled = true
+  }, [ethPrice, updateTopPools, exchangeSubgraphClient, networksInfo])
   return null
 }
 
@@ -511,6 +531,7 @@ export function useHourlyRateData(poolAddress, timeWindow, frequency) {
   const [state, { updateHourlyData }] = usePoolDataContext()
   const chartData = state?.[poolAddress]?.hourlyData?.[timeWindow]
   const [latestBlock] = useLatestBlocks()
+  const [networksInfo] = useNetworksInfo()
 
   useEffect(() => {
     const currentTime = dayjs.utc()
@@ -538,13 +559,13 @@ export function useHourlyRateData(poolAddress, timeWindow, frequency) {
     }
 
     async function fetch() {
-      let data = await getHourlyRateData(exchangeSubgraphClient, poolAddress, startTime, latestBlock, frequency)
+      let data = await getHourlyRateData(exchangeSubgraphClient, poolAddress, startTime, latestBlock, frequency, networksInfo)
       updateHourlyData(poolAddress, data, timeWindow)
     }
     if (!chartData) {
       fetch()
     }
-  }, [chartData, timeWindow, poolAddress, updateHourlyData, latestBlock, frequency, exchangeSubgraphClient])
+  }, [chartData, timeWindow, poolAddress, updateHourlyData, latestBlock, frequency, exchangeSubgraphClient, networksInfo])
 
   return chartData
 }
@@ -560,6 +581,7 @@ export function useDataForList(poolList) {
 
   const [stale, setStale] = useState(false)
   const [fetched, setFetched] = useState([])
+  const [networksInfo] = useNetworksInfo()
 
   // reset
   useEffect(() => {
@@ -588,15 +610,16 @@ export function useDataForList(poolList) {
         unfetched.map((pool) => {
           return pool
         }),
-        ethPrice
+        ethPrice,
+        networksInfo
       )
-      setFetched(newFetched.concat(newPoolData))
+      setFetched(newFetched.concat(newPoolData ? newPoolData : []))
     }
     if (ethPrice && poolList && poolList.length > 0 && !fetched && !stale) {
       setStale(true)
       fetchNewPoolData()
     }
-  }, [ethPrice, state, poolList, stale, fetched, exchangeSubgraphClient])
+  }, [ethPrice, state, poolList, stale, fetched, exchangeSubgraphClient, networksInfo])
 
   let formattedFetch =
     fetched &&
@@ -615,18 +638,19 @@ export function usePoolData(poolAddress) {
   const [state, { update }] = usePoolDataContext()
   const [ethPrice] = useEthPrice()
   const poolData = state?.[poolAddress]
+  const [networksInfo] = useNetworksInfo()
 
   useEffect(() => {
     async function fetchData() {
       if (!poolData && poolAddress) {
-        let data = await getBulkPoolData(exchangeSubgraphClient, [poolAddress], ethPrice)
+        let data = await getBulkPoolData(exchangeSubgraphClient, [poolAddress], ethPrice, networksInfo)
         data && update(poolAddress, data[0])
       }
     }
     if (!poolData && poolAddress && ethPrice && isAddress(poolAddress)) {
       fetchData()
     }
-  }, [poolAddress, poolData, update, ethPrice, exchangeSubgraphClient])
+  }, [poolAddress, poolData, update, ethPrice, exchangeSubgraphClient, networksInfo])
 
   return poolData || {}
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import 'feather-icons'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 import { ButtonDark } from '../ButtonStyled'
 import { isAddress } from '../../utils'
@@ -59,10 +59,12 @@ const DashGrid = styled.div`
 function AccountSearch({ history, small, shortenAddress }) {
   const [accountValue, setAccountValue] = useState()
   const [savedAccounts, addAccount, removeAccount] = useSavedAccounts()
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   function handleAccountSearch() {
     if (isAddress(accountValue.trim())) {
-      history.push('/account/' + accountValue.trim())
+      history.push(prefixNetworkURL + '/account/' + accountValue.trim())
       if (!savedAccounts.includes(accountValue.toLowerCase().trim())) {
         addAccount(accountValue)
       }
@@ -110,7 +112,7 @@ function AccountSearch({ history, small, shortenAddress }) {
                   <Flex
                     area="account"
                     justifyContent="space-between"
-                    onClick={() => history.push('/account/' + account)}
+                    onClick={() => history.push(prefixNetworkURL + '/account/' + account)}
                   >
                     <AccountLink>
                       {shortenAddress || small

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import { Text } from 'rebass'
 import styled from 'styled-components'
 import Link from '../components/Link'
@@ -30,6 +30,7 @@ import { useListedTokens } from '../contexts/Application'
 import bookMark from '../assets/bookmark.svg'
 import bookMarkOutline from '../assets/bookmark_outline.svg'
 import useTheme from '../hooks/useTheme'
+import { useNetworksInfo } from '../contexts/NetworkInfo'
 
 const DashboardWrapper = styled.div`
   width: 100%;
@@ -109,6 +110,7 @@ function TokenPage({ address, history }) {
     oneDayTxns,
     txnChange,
   } = useTokenData(address)
+  const [networksInfo] = useNetworksInfo()
 
   useEffect(() => {
     document.querySelector('body').scrollTo(0, 0)
@@ -133,10 +135,10 @@ function TokenPage({ address, history }) {
     if (Array.isArray(fetchedPairsListAddresses) && fetchedPairsListAddresses.length > 0) {
       bestPair =
         fetchedPairsList[
-          fetchedPairsListAddresses.sort(function (a, b) {
-            // Sort by reserveUSD in descending order
-            return parseFloat(fetchedPairsList[b].reserveUSD) - parseFloat(fetchedPairsList[a].reserveUSD)
-          })[0]
+        fetchedPairsListAddresses.sort(function (a, b) {
+          // Sort by reserveUSD in descending order
+          return parseFloat(fetchedPairsList[b].reserveUSD) - parseFloat(fetchedPairsList[a].reserveUSD)
+        })[0]
         ]
     }
   }
@@ -157,8 +159,8 @@ function TokenPage({ address, history }) {
     oneDayVolumeUSD || oneDayVolumeUSD === 0
       ? formattedNum(oneDayVolumeUSD === 0 ? oneDayVolumeUT : oneDayVolumeUSD, true)
       : oneDayVolumeUSD === 0
-      ? '$0'
-      : '-'
+        ? '$0'
+        : '-'
 
   // mark if using untracked volume
   const [usingUtVolume, setUsingUtVolume] = useState(false)
@@ -189,7 +191,7 @@ function TokenPage({ address, history }) {
   const listedTokens = useListedTokens()
 
   // TODO: Remove this when Cronos has a token list
-  const noWarning = process.env.REACT_APP_CHAIN_ID === '25'
+  const noWarning = networksInfo.CHAIN_ID === 25
 
   useEffect(() => {
     window.scrollTo({
@@ -197,6 +199,8 @@ function TokenPage({ address, history }) {
       top: 0,
     })
   }, [])
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   return (
     <PageWrapper>
@@ -212,13 +216,13 @@ function TokenPage({ address, history }) {
         <RowBetween style={{ flexWrap: 'wrap', alingItems: 'start' }}>
           <AutoRow align="flex-end" style={{ width: 'fit-content' }}>
             <TYPE.body>
-              <BasicLink to="/tokens">{'Tokens '}</BasicLink>→ {symbol}
+              <BasicLink to={prefixNetworkURL + "/tokens"}>{'Tokens '}</BasicLink>→ {symbol}
               {'  '}
             </TYPE.body>
             <Link
               style={{ width: 'fit-content' }}
               external
-              href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${address}`}
+              href={`${networksInfo.ETHERSCAN_URL}/address/${address}`}
             >
               <Text style={{ marginLeft: '.15rem' }} fontSize={'14px'} fontWeight={400}>
                 ({address.slice(0, 8) + '...' + address.slice(36, 42)})
@@ -275,11 +279,11 @@ function TokenPage({ address, history }) {
                   ) : (
                     <></>
                   )}
-                  <Link href={getPoolLink(address)} target="_blank">
+                  <Link href={getPoolLink(address, networksInfo)} target="_blank">
                     <ButtonOutlined style={{ padding: '11px 22px' }}>+ Add Liquidity</ButtonOutlined>
                   </Link>
                   <Link
-                    href={bestPairToken ? getSwapLink(address, bestPairToken) : getSwapLink(address)}
+                    href={bestPairToken ? getSwapLink(address, networksInfo, bestPairToken) : getSwapLink(address, networksInfo)}
                     target="_blank"
                   >
                     <ButtonDark
@@ -357,8 +361,8 @@ function TokenPage({ address, history }) {
                     gridRow: below1280 ? '' : '1/4',
                     ...(below768
                       ? {
-                          padding: '16px 12px',
-                        }
+                        padding: '16px 12px',
+                      }
                       : {}),
                   }}
                 >
@@ -424,8 +428,8 @@ function TokenPage({ address, history }) {
                       <CopyHelper toCopy={address} />
                     </AutoRow>
                   </Column>
-                  <Link external href={`${process.env.REACT_APP_ETHERSCAN_URL}/address/${address}`}>
-                    <ButtonDark color={backgroundColor}>{`View on ${getEtherscanLinkText()}`} ↗</ButtonDark>
+                  <Link external href={`${networksInfo.ETHERSCAN_URL}/address/${address}`}>
+                    <ButtonDark color={backgroundColor}>{`View on ${getEtherscanLinkText(networksInfo)}`} ↗</ButtonDark>
                   </Link>
                 </TokenDetailsLayout>
               </Panel>

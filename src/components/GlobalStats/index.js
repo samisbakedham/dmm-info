@@ -79,7 +79,7 @@ export default function GlobalStats() {
               {oneDayFees}
             </Text>
             <Text fontSize="12px" color={oneDayFeeChange > 0 ? 'green' : theme.red1}>
-              {oneDayFeeChange.toFixed(2)}%
+              {oneDayFeeChange ? oneDayFeeChange.toFixed(2) : '-'}%
             </Text>
           </Flex>
         </Stats>
@@ -92,7 +92,7 @@ export default function GlobalStats() {
               {localNumber(oneDayTxns)}
             </Text>
             <Text fontSize="12px" color={txnChange > 0 ? 'green' : theme.red1}>
-              {txnChange.toFixed(2)}%
+              {txnChange ? txnChange.toFixed(2) : '-'}%
             </Text>
           </Flex>
         </Stats>

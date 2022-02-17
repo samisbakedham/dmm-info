@@ -8,7 +8,7 @@ import styled from 'styled-components'
 
 import { CustomLink } from '../Link'
 import { Divider } from '../../components'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import { formattedNum, formattedPercent } from '../../utils'
 import DoubleTokenLogo from '../DoubleLogo'
 import FormattedName from '../FormattedName'
@@ -146,6 +146,8 @@ function PairList({ pairs, color, disbaleLinks, maxItems = 5 }) {
   // sorting
   const [sortDirection, setSortDirection] = useState(true)
   const [sortedColumn, setSortedColumn] = useState(SORT_FIELD.LIQ)
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   useEffect(() => {
     setMaxPage(1) // edit this to do modular
@@ -188,7 +190,7 @@ function PairList({ pairs, color, disbaleLinks, maxItems = 5 }) {
               a1={pairData.token1.id}
               margin={!below740}
             />
-            <CustomLink style={{ marginLeft: '20px', whiteSpace: 'nowrap' }} to={'/pair/' + pairAddress} color={color}>
+            <CustomLink style={{ marginLeft: '20px', whiteSpace: 'nowrap' }} to={prefixNetworkURL + '/pair/' + pairAddress} color={color}>
               <FormattedName
                 text={pairData.token0.symbol + '-' + pairData.token1.symbol}
                 maxCharacters={below600 ? 8 : 16}
@@ -318,7 +320,9 @@ function PairList({ pairs, color, disbaleLinks, maxItems = 5 }) {
         )}
       </TableHeader>
       <Divider />
-      <List p={0}>{!pairList ? <LocalLoader /> : pairList}</List>
+      {!pairList.length ? <LocalLoader /> :
+        <List p={0}>{pairList}</List>
+      }
       <PageButtons>
         <div
           onClick={(e) => {

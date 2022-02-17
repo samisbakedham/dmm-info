@@ -1,5 +1,5 @@
 import gql from 'graphql-tag'
-import { FACTORY_ADDRESS, BUNDLE_ID } from '../constants'
+import { getFACTORY_ADDRESS, BUNDLE_ID } from '../constants'
 
 export const SUBGRAPH_BLOCK_NUMBER = () => gql`
   query block_number {
@@ -76,9 +76,8 @@ export const GET_BLOCK = gql`
 export const GET_BLOCKS = (timestamps) => {
   let queryString = 'query blocks {'
   queryString += timestamps.map((timestamp) => {
-    return `t${timestamp}:blocks(first: 1, orderBy: timestamp, orderDirection: desc, where: { timestamp_gt: ${timestamp}, timestamp_lt: ${
-      timestamp + 600
-    } }) {
+    return `t${timestamp}:blocks(first: 1, orderBy: timestamp, orderDirection: desc, where: { timestamp_gt: ${timestamp}, timestamp_lt: ${timestamp + 600
+      } }) {
       number
     }`
   })
@@ -510,11 +509,11 @@ export const GLOBAL_CHART = gql`
   }
 `
 
-export const GLOBAL_DATA = (block) => {
+export const GLOBAL_DATA = (networksInfo, block) => {
   const queryString = ` query dmmFactories {
     dmmFactories(
        ${block ? `block: { number: ${block}}` : ``}
-       where: { id: "${FACTORY_ADDRESS.toLowerCase()}" }) {
+       where: { id: "${getFACTORY_ADDRESS(networksInfo).toLowerCase()}" }) {
         id
         totalVolumeUSD
         totalFeeUSD
@@ -821,7 +820,7 @@ export const PAIR_POOLS_DATA = (pairAddress, block) => {
   return gql(queryString)
 }
 
-export const PAIRS_BULK = gql`
+export const  PAIRS_BULK = gql`
   ${PairFields}
   query pairs($allPairs: [Bytes]!) {
     pairs(where: { id_in: $allPairs }, orderBy: trackedReserveETH, orderDirection: desc) {

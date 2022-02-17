@@ -1,5 +1,5 @@
 import React from 'react'
-import { withRouter } from 'react-router-dom'
+import { useParams, withRouter } from 'react-router-dom'
 import styled from 'styled-components'
 import { RowBetween, RowFixed } from '../Row'
 import { AutoColumn } from '../Column'
@@ -51,6 +51,8 @@ function PinnedData({ history, open, setSavedOpen }) {
   const [savedPairs, , removePair] = useSavedPairs()
   const [savedPools, , removePool] = useSavedPools()
   const [savedTokens, , removeToken] = useSavedTokens()
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   return !open ? (
     <RightColumn open={open} onClick={() => setSavedOpen(true)}>
@@ -88,7 +90,7 @@ function PinnedData({ history, open, setSavedOpen }) {
                 const pair = savedPairs[address]
                 return (
                   <RowBetween key={pair.address}>
-                    <ButtonFaded onClick={() => history.push('/pair/' + address)}>
+                    <ButtonFaded onClick={() => history.push(prefixNetworkURL + '/pair/' + address)}>
                       <RowFixed>
                         <TYPE.header>
                           <FormattedName
@@ -125,7 +127,7 @@ function PinnedData({ history, open, setSavedOpen }) {
                 const pool = savedPools[address]
                 return (
                   <RowBetween key={pool.address}>
-                    <ButtonFaded onClick={() => history.push('/pool/' + pool.address)}>
+                    <ButtonFaded onClick={() => history.push(prefixNetworkURL + '/pool/' + pool.address)}>
                       <RowFixed>
                         <TYPE.header>
                           <FormattedName text={shortenAddress(pool.address, 3)} maxCharacters={12} fontSize={'12px'} />
@@ -158,7 +160,7 @@ function PinnedData({ history, open, setSavedOpen }) {
                 const token = savedTokens[address]
                 return (
                   <RowBetween key={address}>
-                    <ButtonFaded onClick={() => history.push('/token/' + address)}>
+                    <ButtonFaded onClick={() => history.push(prefixNetworkURL + '/token/' + address)}>
                       <RowFixed>
                         <TokenLogo address={address} size={'14px'} />
                         <TYPE.header ml={'6px'}>

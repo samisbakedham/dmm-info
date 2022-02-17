@@ -12,6 +12,8 @@ import { TYPE } from '../../Theme'
 import { shortenAddress, formattedNum } from '../../utils'
 import { MAX_ALLOW_APY } from '../../constants'
 import useTheme from '../../hooks/useTheme'
+import { useNetworksInfo } from '../../contexts/NetworkInfo'
+import { useParams } from 'react-router-dom'
 
 const TableRow = styled.div`
   display: grid;
@@ -109,6 +111,9 @@ export const ItemCard = ({ pool }) => {
   const oneYearFL = getOneYearFL(liquidity, oneDayFee).toFixed(2)
 
   const theme = useTheme()
+  const [networksInfo] = useNetworksInfo()
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
   return (
     <div>
       {isWarning && (
@@ -124,7 +129,7 @@ export const ItemCard = ({ pool }) => {
           <DataTitle>Pool</DataTitle>
           <DataText grid-area="pool">
             <PoolAddressContainer>
-              <CustomLink to={`/pool/${pool.id}`} style={{ cursor: 'pointer' }}>
+              <CustomLink to={prefixNetworkURL + `/pool/${pool.id}`} style={{ cursor: 'pointer' }}>
                 {shortenPoolAddress}
               </CustomLink>
               <CopyHelper toCopy={pool.id} />
@@ -135,7 +140,7 @@ export const ItemCard = ({ pool }) => {
         <GridItem>
           <DataText style={{ alignItems: 'flex-end', color: theme.primary }}>
             <Link
-              href={`${process.env.REACT_APP_DMM_SWAP_URL}add/${pool.token0.id}/${pool.token1.id}/${pool.id}`}
+              href={`${networksInfo.DMM_SWAP_URL}add/${pool.token0.id}/${pool.token1.id}/${pool.id}`}
               target="_blank"
             >
               <ButtonLight>+ Add</ButtonLight>
@@ -197,6 +202,9 @@ const ListItem = ({ pool, oddRow }) => {
   const oneYearFL = getOneYearFL(liquidity, oneDayFee).toFixed(2)
 
   const theme = useTheme()
+  const [networksInfo] = useNetworksInfo()
+  const { network: currentNetworkURL } = useParams()
+  const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
   return (
     <TableRow oddRow={oddRow}>
@@ -207,7 +215,7 @@ const ListItem = ({ pool, oddRow }) => {
           </MouseoverTooltip>
         </div>
       )}
-      <CustomLink to={`/pool/${pool.id}`} style={{ cursor: 'pointer' }}>
+      <CustomLink to={prefixNetworkURL + `/pool/${pool.id}`} style={{ cursor: 'pointer' }}>
         <DataText grid-area="pool" style={{ color: theme.primary }}>
           {shortenPoolAddress}
         </DataText>
@@ -234,7 +242,7 @@ const ListItem = ({ pool, oddRow }) => {
       <DataText grid-area="add_liquidity" alignItems="flex-end">
         {
           <Link
-            href={`${process.env.REACT_APP_DMM_SWAP_URL}add/${pool.token0.id}/${pool.token1.id}/${pool.id}?networkId=${process.env.REACT_APP_CHAIN_ID}`}
+            href={`${networksInfo.DMM_SWAP_URL}add/${pool.token0.id}/${pool.token1.id}/${pool.id}?networkId=${networksInfo.CHAIN_ID}`}
             target="_blank"
           >
             <ButtonLight>+ Add</ButtonLight>
