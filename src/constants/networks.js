@@ -26,7 +26,7 @@ export const NETWORK_LABEL = {
   [ChainId.MATIC]: 'Polygon',
   [ChainId.MUMBAI]: 'Mumbai',
   [ChainId.BSCMAINNET]: 'BSC',
-  [ChainId.BSCMAINNET]: 'BSC Testnet',
+  [ChainId.BSCTESTNET]: 'BSC Testnet',
   [ChainId.AVAXMAINNET]: 'Avalanche',
   [ChainId.AVAXTESTNET]: 'Avax Testnet',
   [ChainId.FANTOM]: 'Fantom',
