@@ -51,6 +51,7 @@ const SwitchNetworkButton = () => {
       ChainId.FANTOM,
       ChainId.CRONOS,
       ChainId.ARBITRUM,
+      ChainId.BTTC,
     ].includes(chainId)
   ) {
     return null

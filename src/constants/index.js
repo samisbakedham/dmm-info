@@ -79,6 +79,7 @@ export const ChainId = {
   CRONOS: 25,
   ARBITRUM_TESTNET: 421611,
   ARBITRUM: 42161,
+  BTTC: 199,
 }
 
 export const ANALYTICS_URLS = {
@@ -89,6 +90,7 @@ export const ANALYTICS_URLS = {
   250: 'https://fantom-analytics.kyberswap.com',
   25: 'https://cronos-analytics.kyberswap.com',
   [ChainId.ARBITRUM]: 'https://arbitrum-analytics.kyberswap.com',
+  [ChainId.BTTC]: 'https://bttc-analytics.kyberswap.com',
 }
 
 export const MAX_ALLOW_APY = 2000
