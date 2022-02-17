@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import { ChainId } from '../../constants'
-import { NETWORK_ICON, NETWORK_LABEL } from '../../constants/networks'
+import { NETWORK_ICON } from '../../constants/networks'
 import { ButtonOutlined } from '../ButtonStyled'
 import { useToggleNetworkModal } from '../../contexts/Application'
 import SwitchNetworkIcon from '../../assets/networks/switch-network.svg'
@@ -48,7 +48,7 @@ const SwitchNetworkButton = () => {
     <ButtonWrapper onClick={toggleNetworkModal}>
       <NetworkWrapper>
         <img src={NETWORK_ICON[chainId]} alt="Network Icon" style={{ width: '20px' }} />
-        {!below576 && <NetworkLabel>{NETWORK_LABEL[chainId]}</NetworkLabel>}
+        {!below576 && <NetworkLabel>{networksInfo.NAME}</NetworkLabel>}
       </NetworkWrapper>
       <img src={SwitchNetworkIcon} alt="Switch Network Icon" style={{ marginTop: '4px', marginLeft: '6px' }} />
     </ButtonWrapper>

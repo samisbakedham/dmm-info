@@ -19,17 +19,3 @@ export const NETWORK_ICON = {
   [ChainId.CRONOS]: Cronos,
   [ChainId.CRONOSTESTNET]: Cronos,
 }
-
-export const NETWORK_LABEL = {
-  [ChainId.MAINNET]: 'Ethereum',
-  [ChainId.ROPSTEN]: 'Ropsten',
-  [ChainId.MATIC]: 'Polygon',
-  [ChainId.MUMBAI]: 'Mumbai',
-  [ChainId.BSCMAINNET]: 'BSC',
-  [ChainId.BSCTESTNET]: 'BSC Testnet',
-  [ChainId.AVAXMAINNET]: 'Avalanche',
-  [ChainId.AVAXTESTNET]: 'Avax Testnet',
-  [ChainId.FANTOM]: 'Fantom',
-  [ChainId.CRONOS]: 'Cronos',
-  [ChainId.CRONOSTESTNET]: 'Cronos Testnet',
-}
