@@ -43,7 +43,7 @@ const BTTC_TOKEN_ARRAY = [
   },
   {
     chainId: 199,
-    address: '0x185a4091027e2db459a2433f85f894dc3013aeb5',
+    address: '0x185a4091027E2dB459a2433F85f894dC3013aeB5',
     symbol: 'BNB',
     decimals: 18,
     name: 'Binance Coin',
