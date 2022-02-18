@@ -51,75 +51,35 @@ function useTokenDataContext() {
 function reducer(state, { type, payload }) {
   switch (type) {
     case UPDATE: {
-      const { tokenAddress, data } = payload
+      const { tokenAddress, data, chainId } = payload
       if (!data) return state
-      return {
-        ...state,
-        [tokenAddress]: {
-          ...state?.[tokenAddress],
-          ...data,
-        },
-      }
+      return merge(state, { [chainId]: { [tokenAddress]: data } })
     }
     case UPDATE_TOP_TOKENS: {
-      const { topTokens } = payload
+      const { topTokens, chainId } = payload
       let added = {}
-      topTokens &&
-        topTokens.map((token) => {
-          return (added[token.id] = token)
-        })
-      return merge(state, added)
+      topTokens && topTokens.forEach((token) => added[token.id] = token)
+      return merge(state, { [chainId]: added })
     }
-
     case CLEAR_TOP_TOKENS: {
       return {
       }
     }
-
     case UPDATE_TOKEN_TXNS: {
-      const { address, transactions } = payload
-      return {
-        ...state,
-        [address]: {
-          ...state?.[address],
-          txns: transactions,
-        },
-      }
+      const { address, transactions, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { txns: transactions } } })
     }
     case UPDATE_CHART_DATA: {
-      const { address, chartData } = payload
-      return {
-        ...state,
-        [address]: {
-          ...state?.[address],
-          chartData,
-        },
-      }
+      const { address, chartData, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { chartData: chartData } } })
     }
-
     case UPDATE_PRICE_DATA: {
-      const { address, data, timeWindow, interval } = payload
-      return {
-        ...state,
-        [address]: {
-          ...state?.[address],
-          [timeWindow]: {
-            ...state?.[address]?.[timeWindow],
-            [interval]: data,
-          },
-        },
-      }
+      const { address, data, timeWindow, interval, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { [timeWindow]: { [interval]: data } } } })
     }
-
     case UPDATE_ALL_PAIRS: {
-      const { address, allPairs } = payload
-      return {
-        ...state,
-        [address]: {
-          ...state?.[address],
-          [TOKEN_PAIRS_KEY]: allPairs,
-        },
-      }
+      const { address, allPairs, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { [TOKEN_PAIRS_KEY]: allPairs } } })
     }
     default: {
       throw Error(`Unexpected action type in DataContext reducer: '${type}'.`)
@@ -129,21 +89,23 @@ function reducer(state, { type, payload }) {
 
 export default function Provider({ children }) {
   const [state, dispatch] = useReducer(reducer, {})
-  const update = useCallback((tokenAddress, data) => {
+  const update = useCallback((tokenAddress, data, chainId) => {
     dispatch({
       type: UPDATE,
       payload: {
         tokenAddress,
         data,
+        chainId,
       },
     })
   }, [])
 
-  const updateTopTokens = useCallback((topTokens) => {
+  const updateTopTokens = useCallback((topTokens, chainId) => {
     dispatch({
       type: UPDATE_TOP_TOKENS,
       payload: {
         topTokens,
+        chainId,
       },
     })
   }, [])
@@ -154,31 +116,31 @@ export default function Provider({ children }) {
     })
   }, [])
 
-  const updateTokenTxns = useCallback((address, transactions) => {
+  const updateTokenTxns = useCallback((address, transactions, chainId) => {
     dispatch({
       type: UPDATE_TOKEN_TXNS,
-      payload: { address, transactions },
+      payload: { address, transactions, chainId },
     })
   }, [])
 
-  const updateChartData = useCallback((address, chartData) => {
+  const updateChartData = useCallback((address, chartData, chainId) => {
     dispatch({
       type: UPDATE_CHART_DATA,
-      payload: { address, chartData },
+      payload: { address, chartData, chainId },
     })
   }, [])
 
-  const updateAllPairs = useCallback((address, allPairs) => {
+  const updateAllPairs = useCallback((address, allPairs, chainId) => {
     dispatch({
       type: UPDATE_ALL_PAIRS,
-      payload: { address, allPairs },
+      payload: { address, allPairs, chainId },
     })
   }, [])
 
-  const updatePriceData = useCallback((address, data, timeWindow, interval) => {
+  const updatePriceData = useCallback((address, data, timeWindow, interval, chainId) => {
     dispatch({
       type: UPDATE_PRICE_DATA,
-      payload: { address, data, timeWindow, interval },
+      payload: { address, data, timeWindow, interval, chainId },
     })
   }, [])
 
@@ -644,7 +606,7 @@ export function Updater() {
     async function getData() {
       // get top pairs for overview list
       let topTokens = await getTopTokens(exchangeSubgraphClient, ethPrice, ethPriceOld, networksInfo)
-      !canceled && topTokens && updateTopTokens(topTokens)
+      !canceled && topTokens && updateTopTokens(topTokens, networksInfo.CHAIN_ID)
     }
     ethPrice && ethPriceOld && getData()
     return () => canceled = true
@@ -657,14 +619,14 @@ export function useTokenData(tokenAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { update }] = useTokenDataContext()
   const [ethPrice, ethPriceOld] = useEthPrice()
-  const tokenData = state?.[tokenAddress]
   const [networksInfo] = useNetworksInfo()
+  const tokenData = state?.[networksInfo.CHAIN_ID]?.[tokenAddress]
 
   useEffect(() => {
     if (!tokenData && ethPrice && ethPriceOld && isAddress(tokenAddress)) {
       getTokenData(exchangeSubgraphClient, tokenAddress, ethPrice, ethPriceOld, networksInfo).then((data) => {
         if (data) {
-          update(tokenAddress, data)
+          update(tokenAddress, data, networksInfo.CHAIN_ID)
         } else {
           // update(tokenAddress, null)
           // token not found
@@ -679,7 +641,8 @@ export function useTokenData(tokenAddress) {
 export function useTokenTransactions(tokenAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updateTokenTxns }] = useTokenDataContext()
-  const tokenTxns = state?.[tokenAddress]?.txns
+  const [networksInfo] = useNetworksInfo()
+  const tokenTxns = state?.[networksInfo.CHAIN_ID]?.[tokenAddress]?.txns
 
   const allPairsFormatted =
     state[tokenAddress] &&
@@ -689,15 +652,13 @@ export function useTokenTransactions(tokenAddress) {
     })
 
   useEffect(() => {
-    let canceled = false
     async function checkForTxns() {
       if (!tokenTxns && allPairsFormatted) {
         let transactions = await getTokenTransactions(exchangeSubgraphClient, allPairsFormatted)
-        !canceled && updateTokenTxns(tokenAddress, transactions)
+        updateTokenTxns(tokenAddress, transactions, networksInfo.CHAIN_ID)
       }
     }
-    state[tokenAddress] && checkForTxns()
-    return () => canceled = true
+    checkForTxns()
   }, [state[tokenAddress], tokenTxns, tokenAddress, updateTokenTxns, allPairsFormatted, exchangeSubgraphClient])
 
   return tokenTxns || []
@@ -706,18 +667,17 @@ export function useTokenTransactions(tokenAddress) {
 export function useTokenPairs(tokenAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updateAllPairs }] = useTokenDataContext()
-  const tokenPairs = state?.[tokenAddress]?.[TOKEN_PAIRS_KEY]
+  const [networksInfo] = useNetworksInfo()
+  const tokenPairs = state?.[networksInfo.CHAIN_ID]?.[tokenAddress]?.[TOKEN_PAIRS_KEY]
 
   useEffect(() => {
-    let canceled = false
     async function fetchData() {
       let allPairs = await getTokenPairs(exchangeSubgraphClient, tokenAddress)
-      !canceled && updateAllPairs(tokenAddress, allPairs)
+      updateAllPairs(tokenAddress, allPairs, networksInfo.CHAIN_ID)
     }
-    if (state[tokenAddress] && !tokenPairs && isAddress(tokenAddress)) {
+    if (!tokenPairs && isAddress(tokenAddress)) {
       fetchData()
     }
-    return () => canceled = true
   }, [state[tokenAddress], tokenAddress, tokenPairs, updateAllPairs, exchangeSubgraphClient])
 
   return tokenPairs || []
@@ -726,17 +686,16 @@ export function useTokenPairs(tokenAddress) {
 export function useTokenChartData(tokenAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updateChartData }] = useTokenDataContext()
-  const chartData = state?.[tokenAddress]?.chartData
+  const [networksInfo] = useNetworksInfo()
+  const chartData = state?.[networksInfo.CHAIN_ID]?.[tokenAddress]?.chartData
   useEffect(() => {
-    let canceled = false
     async function checkForChartData() {
       if (!chartData) {
         let data = await getTokenChartData(exchangeSubgraphClient, tokenAddress)
-        !canceled && updateChartData(tokenAddress, data)
+        updateChartData(tokenAddress, data, networksInfo.CHAIN_ID)
       }
     }
-    state[tokenAddress] && checkForChartData()
-    return () => canceled = true
+    checkForChartData()
   }, [state[tokenAddress], chartData, tokenAddress, updateChartData, exchangeSubgraphClient])
   return chartData
 }
@@ -751,14 +710,13 @@ export function useTokenChartData(tokenAddress) {
 export function useTokenPriceData(tokenAddress, timeWindow, interval = 3600) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updatePriceData }] = useTokenDataContext()
-  const chartData = state?.[tokenAddress]?.[timeWindow]?.[interval]
-  const [latestBlock] = useLatestBlocks()
   const [networksInfo] = useNetworksInfo()
+  const [latestBlock] = useLatestBlocks()
+  const chartData = state?.[networksInfo.CHAIN_ID]?.[tokenAddress]?.[timeWindow]?.[interval]
 
   useEffect(() => {
     const currentTime = dayjs.utc()
     let startTime
-    let canceled = false
 
     switch (timeWindow) {
       case timeframeOptions.FOUR_HOURS:
@@ -783,12 +741,11 @@ export function useTokenPriceData(tokenAddress, timeWindow, interval = 3600) {
 
     async function fetch() {
       let data = await getIntervalTokenData(exchangeSubgraphClient, tokenAddress, startTime, interval, latestBlock, networksInfo)
-      !canceled && updatePriceData(tokenAddress, data, timeWindow, interval)
+      updatePriceData(tokenAddress, data, timeWindow, interval, networksInfo.CHAIN_ID)
     }
-    if (state[tokenAddress] && !chartData) {
+    if (!chartData) {
       fetch()
     }
-    return () => canceled = true
   }, [state[tokenAddress], chartData, interval, timeWindow, tokenAddress, updatePriceData, latestBlock, exchangeSubgraphClient, networksInfo])
 
   return chartData
