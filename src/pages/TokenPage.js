@@ -30,6 +30,7 @@ import { useListedTokens } from '../contexts/Application'
 import bookMark from '../assets/bookmark.svg'
 import bookMarkOutline from '../assets/bookmark_outline.svg'
 import useTheme from '../hooks/useTheme'
+import { ChainId } from '../constants'
 
 const DashboardWrapper = styled.div`
   width: 100%;
@@ -188,8 +189,8 @@ function TokenPage({ address, history }) {
   const [savedTokens, addToken, removeToken] = useSavedTokens()
   const listedTokens = useListedTokens()
 
-  // TODO: Remove this when Cronos has a token list
-  const noWarning = process.env.REACT_APP_CHAIN_ID === '25'
+  // TODO: Remove this when Cronos and BTTC has a token list
+  const noWarning = ['25', `${ChainId.BTTC}`].includes(process.env.REACT_APP_CHAIN_ID)
 
   useEffect(() => {
     window.scrollTo({
