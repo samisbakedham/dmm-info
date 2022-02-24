@@ -18,7 +18,7 @@ env:
 jobs:
   prepare:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: [self-hosted]
+    runs-on: ubuntu-18.04
     outputs:
       head_sha: ${{ steps.head_sha.outputs.value }}
       repo_name: ${{ github.event.repository.name }}
@@ -74,7 +74,7 @@ jobs:
     if: github.event.action != 'closed'
     needs:
       - prepare
-    runs-on: [self-hosted]
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -143,7 +143,7 @@ jobs:
       - prepare
       - build
     if: github.event.action == 'opened' || github.event.action == 'reopened'
-    runs-on: [self-hosted]
+    runs-on: ubuntu-18.04
     steps:
     - name: Map event
       id: map_event
@@ -161,7 +161,7 @@ jobs:
     needs:
       - prepare
     if: github.event.action == 'closed'
-    runs-on: [self-hosted]
+    runs-on: ubuntu-18.04
     steps:
     - name: Trigger to ADPR
       uses: peter-evans/repository-dispatch@v1
