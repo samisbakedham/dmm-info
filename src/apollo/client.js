@@ -18,9 +18,9 @@ export const useClient = () => {
       }),
     [networksInfo]
   )
-
   return client
 }
+
 export const healthClient = new ApolloClient({
   link: new HttpLink({
     uri: 'https://api.thegraph.com/index-node/graphql',

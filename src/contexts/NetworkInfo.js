@@ -27,10 +27,9 @@ for (const key in process.env) {
   }
 }
 NetworksInfoEnv.sort((networkInfoA, networkInfoB) => networkInfoA.LIST_ORDER - networkInfoB.LIST_ORDER)
-console.log('🚀 namgold  ---------------------------------------------')
-console.log('🚀 namgold  ~ NetworksInfoEnv', NetworksInfoEnv)
-console.log('🚀 namgold  ---------------------------------------------')
-console.log('🚀 namgold  ~ NetworksInfoEnv', NetworksInfoEnv)
+console.log('🚀 ---------------------------------------------')
+console.log('🚀 ~ NetworksInfoEnv', NetworksInfoEnv)
+console.log('🚀 ---------------------------------------------')
 
 // const INITIAL_STATE = {}
 const INITIAL_STATE = {
