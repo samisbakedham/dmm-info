@@ -161,6 +161,7 @@ function TopTokenList({ tokens, itemMax = 5 }) {
         .filter((key) => {
           return tokens[key]
         })
+        .filter((key) => tokens[key].name !== 'error-token')
         .map((key) => tokens[key])
     )
   }, [tokens])

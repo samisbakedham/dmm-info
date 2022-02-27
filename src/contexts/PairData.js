@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useMemo, useCallback, useEffect, useState } from 'react'
+import merge from 'deepmerge'
 
 import { getWETH_ADDRESS } from '../constants'
 import {
@@ -37,7 +38,6 @@ const UPDATE_PAIR_POOLS = 'UPDATE_PAIR_POOLS'
 const UPDATE_PAIR_TXNS = 'UPDATE_PAIR_TXNS'
 const UPDATE_CHART_DATA = 'UPDATE_CHART_DATA'
 const UPDATE_TOP_PAIRS = 'UPDATE_TOP_PAIRS'
-const CLEAR_TOP_PAIRS = 'CLEAR_TOP_PAIRS'
 const UPDATE_HOURLY_DATA = 'UPDATE_HOURLY_DATA'
 
 dayjs.extend(utc)
@@ -60,79 +60,36 @@ function usePairDataContext() {
 function reducer(state, { type, payload }) {
   switch (type) {
     case UPDATE: {
-      const { pairAddress, data } = payload
-      if (!data) return state
-      return {
-        ...state,
-        [pairAddress]: {
-          ...state?.[pairAddress],
-          ...data,
-        },
-      }
+      const { pairAddress, data, chainId } = payload
+      if (!data) return merge(state, { [chainId]: { [pairAddress]: { name: 'error-pair' } } })
+      return merge(state, { [chainId]: { [pairAddress]: data } })
     }
 
     case UPDATE_TOP_PAIRS: {
-      const { topPairs } = payload
+      const { topPairs, chainId } = payload
       let added = {}
-      topPairs.map((pair) => {
-        return (added[pair.id] = pair)
-      })
-      return {
-        ...state,
-        ...added,
-      }
-    }
-
-    case CLEAR_TOP_PAIRS: {
-      return {
-      }
+      topPairs && topPairs.forEach(pair => added[pair.id] = pair)
+      return merge(state, { [chainId]: added })
     }
 
     case UPDATE_PAIR_POOLS: {
-      const { address, pools } = payload
-      return {
-        ...state,
-        [address]: {
-          ...(safeAccess(state, [address]) || {}),
-          pools,
-        },
-      }
+      const { address, pools, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { pools } } })
     }
 
     case UPDATE_PAIR_TXNS: {
-      const { address, transactions } = payload
-      return {
-        ...state,
-        [address]: {
-          ...(safeAccess(state, [address]) || {}),
-          txns: transactions,
-        },
-      }
+      const { address, transactions, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { txns: transactions } } })
     }
 
     case UPDATE_CHART_DATA: {
-      const { address, chartData } = payload
-      return {
-        ...state,
-        [address]: {
-          ...(safeAccess(state, [address]) || {}),
-          chartData,
-        },
-      }
+      const { address, chartData, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { chartData } } })
     }
 
     case UPDATE_HOURLY_DATA: {
-      const { address, hourlyData, timeWindow } = payload
-      return {
-        ...state,
-        [address]: {
-          ...state?.[address],
-          hourlyData: {
-            ...state?.[address]?.hourlyData,
-            [timeWindow]: hourlyData,
-          },
-        },
-      }
+      const { address, hourlyData, timeWindow, chainId } = payload
+      return merge(state, { [chainId]: { [address]: { hourlyData: { [timeWindow]: hourlyData } } } })
     }
 
     default: {
@@ -145,56 +102,52 @@ export default function Provider({ children }) {
   const [state, dispatch] = useReducer(reducer, {})
 
   // update pair specific data
-  const update = useCallback((pairAddress, data) => {
+  const update = useCallback((pairAddress, data, chainId) => {
     dispatch({
       type: UPDATE,
       payload: {
         pairAddress,
         data,
+        chainId,
       },
     })
   }, [])
 
-  const updateTopPairs = useCallback((topPairs) => {
+  const updateTopPairs = useCallback((topPairs, chainId) => {
     dispatch({
       type: UPDATE_TOP_PAIRS,
       payload: {
         topPairs,
+        chainId,
       },
     })
   }, [])
 
-  const clearTopPairs = useCallback(() => {
-    dispatch({
-      type: CLEAR_TOP_PAIRS,
-    })
-  }, [])
-
-  const updatePairPools = useCallback((address, pools) => {
+  const updatePairPools = useCallback((address, pools, chainId) => {
     dispatch({
       type: UPDATE_PAIR_POOLS,
-      payload: { address, pools },
+      payload: { address, pools, chainId },
     })
   }, [])
 
-  const updatePairTxns = useCallback((address, transactions) => {
+  const updatePairTxns = useCallback((address, transactions, chainId) => {
     dispatch({
       type: UPDATE_PAIR_TXNS,
-      payload: { address, transactions },
+      payload: { address, transactions, chainId },
     })
   }, [])
 
-  const updateChartData = useCallback((address, chartData) => {
+  const updateChartData = useCallback((address, chartData, chainId) => {
     dispatch({
       type: UPDATE_CHART_DATA,
-      payload: { address, chartData },
+      payload: { address, chartData, chainId },
     })
   }, [])
 
-  const updateHourlyData = useCallback((address, hourlyData, timeWindow) => {
+  const updateHourlyData = useCallback((address, hourlyData, timeWindow, chainId) => {
     dispatch({
       type: UPDATE_HOURLY_DATA,
-      payload: { address, hourlyData, timeWindow },
+      payload: { address, hourlyData, timeWindow, chainId },
     })
   }, [])
 
@@ -209,11 +162,10 @@ export default function Provider({ children }) {
             updatePairTxns,
             updateChartData,
             updateTopPairs,
-            clearTopPairs,
             updateHourlyData,
           },
         ],
-        [state, update, updatePairTxns, updateChartData, updateTopPairs, clearTopPairs, updateHourlyData, updatePairPools]
+        [state, update, updatePairTxns, updateChartData, updateTopPairs, updateHourlyData, updatePairPools]
       )}
     >
       {children}
@@ -543,13 +495,9 @@ const getRateData = async (client, pairAddress, startTime, latestBlock, networks
 
 export function Updater() {
   const exchangeSubgraphClient = useExchangeClient()
-  const [, { updateTopPairs, clearTopPairs }] = usePairDataContext()
+  const [, { updateTopPairs }] = usePairDataContext()
   const [ethPrice] = useEthPrice()
   const [networksInfo] = useNetworksInfo()
-
-  useEffect(() => {
-    clearTopPairs(null)
-  }, [networksInfo, exchangeSubgraphClient, clearTopPairs])
 
   useEffect(() => {
     let canceled = false
@@ -567,7 +515,7 @@ export function Updater() {
 
       // get data for every pair in list
       let topPairs = await getBulkPairData(exchangeSubgraphClient, formattedPairs, ethPrice, networksInfo)
-      !canceled && topPairs && updateTopPairs(topPairs)
+      !canceled && topPairs && updateTopPairs(topPairs, networksInfo.CHAIN_ID)
     }
     ethPrice && getData()
     return () => canceled = true
@@ -578,14 +526,13 @@ export function Updater() {
 export function usePairRateData(pairAddress, timeWindow, frequency) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updateHourlyData }] = usePairDataContext()
-  const chartData = state?.[pairAddress]?.hourlyData?.[timeWindow]
-  const [latestBlock] = useLatestBlocks()
   const [networksInfo] = useNetworksInfo()
+  const chartData = state?.[networksInfo.CHAIN_ID]?.[pairAddress]?.hourlyData?.[timeWindow]
+  const [latestBlock] = useLatestBlocks()
 
   useEffect(() => {
     const currentTime = dayjs.utc()
     let startTime
-    let canceled = false
 
     switch (timeWindow) {
       case timeframeOptions.FOUR_HOURS:
@@ -610,13 +557,12 @@ export function usePairRateData(pairAddress, timeWindow, frequency) {
 
     async function fetch() {
       let data = await getRateData(exchangeSubgraphClient, pairAddress, startTime, latestBlock, networksInfo, frequency)
-      !canceled && updateHourlyData(pairAddress, data, timeWindow)
+      updateHourlyData(pairAddress, data, timeWindow, networksInfo.CHAIN_ID)
     }
-    if (state?.[pairAddress] && !chartData) {
+    if (!chartData) {
       fetch()
     }
-    return () => canceled = true
-  }, [state?.[pairAddress], chartData, timeWindow, pairAddress, updateHourlyData, latestBlock, frequency, exchangeSubgraphClient, networksInfo])
+  }, [chartData, timeWindow, pairAddress, updateHourlyData, latestBlock, frequency, exchangeSubgraphClient, networksInfo])
 
   return chartData
 }
@@ -634,13 +580,12 @@ export function useDataForList(pairList) {
   const [networksInfo] = useNetworksInfo()
 
   useEffect(() => {
-    let canceled = false
     async function fetchNewPairData() {
       let newFetched = []
       let unfetched = []
 
       pairList.forEach((pair) => {
-        let currentData = state?.[pair.id]
+        let currentData = state?.[networksInfo.CHAIN_ID]?.[pair.id]
         if (!currentData) {
           unfetched.push(pair.id)
         } else {
@@ -656,13 +601,10 @@ export function useDataForList(pairList) {
         ethPrice,
         networksInfo,
       )
-      !canceled && setFetched(newFetched.concat(newPairData ? newPairData : []))
+      setFetched(newFetched.concat(newPairData ? newPairData : []), networksInfo.CHAIN_ID)
     }
     if (ethPrice && pairList && pairList.length > 0 && !fetched?.length) {
       fetchNewPairData()
-    }
-    return () => {
-      canceled = true
     }
   }, [ethPrice, state, pairList, fetched, exchangeSubgraphClient, networksInfo])
 
@@ -682,21 +624,19 @@ export function usePairData(pairAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { update }] = usePairDataContext()
   const [ethPrice] = useEthPrice()
-  const pairData = state?.[pairAddress]
   const [networksInfo] = useNetworksInfo()
+  const pairData = state?.[networksInfo.CHAIN_ID]?.[pairAddress]
 
   useEffect(() => {
-    let canceled = false
     async function fetchData() {
       if (!pairData && pairAddress) {
         let data = await getBulkPairData(exchangeSubgraphClient, [pairAddress], ethPrice, networksInfo)
-        !canceled && data && update(pairAddress, data[0])
+        data && update(pairAddress, data[0], networksInfo.CHAIN_ID)
       }
     }
     if (!pairData && pairAddress && ethPrice && isAddress(pairAddress.split('_')[0]) && isAddress(pairAddress.split('_')[1])) {
       fetchData()
     }
-    return () => canceled = true
   }, [pairAddress, pairData, update, ethPrice, exchangeSubgraphClient, networksInfo])
 
   return pairData || {}
@@ -709,11 +649,10 @@ export function usePairPools(pairAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updatePairPools }] = usePairDataContext()
   const [ethPrice] = useEthPrice()
-  const pairPools = state?.[pairAddress]?.pools
   const [networksInfo] = useNetworksInfo()
+  const pairPools = state?.[networksInfo.CHAIN_ID]?.[pairAddress]?.pools
 
   useEffect(() => {
-    let canceled = false
     async function checkForPairPools() {
       if (!pairPools) {
         let pools = await getPairPools(exchangeSubgraphClient, pairAddress)
@@ -725,12 +664,11 @@ export function usePairPools(pairAddress) {
 
         // get data for every pool in list
         let pairPoolsData = await getBulkPoolData(exchangeSubgraphClient, formattedPools, ethPrice, networksInfo)
-        !canceled && pairPoolsData && updatePairPools(pairAddress, pairPoolsData)
+        pairPoolsData && updatePairPools(pairAddress, pairPoolsData, networksInfo.CHAIN_ID)
       }
     }
-    state?.[pairAddress] && ethPrice && checkForPairPools()
-    return () => canceled = true
-  }, [state?.[pairAddress], pairPools, pairAddress, updatePairPools, ethPrice, exchangeSubgraphClient, networksInfo])
+    ethPrice && checkForPairPools()
+  }, [pairPools, pairAddress, updatePairPools, ethPrice, exchangeSubgraphClient, networksInfo])
 
   return pairPools
 }
@@ -742,37 +680,35 @@ export function usePairPools(pairAddress) {
 export function usePairTransactions(pairAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updatePairTxns }] = usePairDataContext()
-  const pairTxns = state?.[pairAddress]?.txns
+  const [networksInfo] = useNetworksInfo()
+  const pairTxns = state?.[networksInfo.CHAIN_ID]?.[pairAddress]?.txns
   useEffect(() => {
-    let canceled = false
     async function checkForTxns() {
       if (!pairTxns) {
         let transactions = await getPairTransactions(exchangeSubgraphClient, pairAddress)
-        !canceled && updatePairTxns(pairAddress, transactions)
+        updatePairTxns(pairAddress, transactions, networksInfo.CHAIN_ID)
       }
     }
-    state?.[pairAddress] && checkForTxns()
-    return () => canceled = true
-  }, [state?.[pairAddress], pairTxns, pairAddress, updatePairTxns, exchangeSubgraphClient])
+    checkForTxns()
+  }, [pairTxns, pairAddress, updatePairTxns, exchangeSubgraphClient])
   return pairTxns
 }
 
 export function usePairChartData(pairAddress) {
   const exchangeSubgraphClient = useExchangeClient()
   const [state, { updateChartData }] = usePairDataContext()
-  const chartData = state?.[pairAddress]?.chartData
+  const [networksInfo] = useNetworksInfo()
+  const chartData = state?.[networksInfo.CHAIN_ID]?.[pairAddress]?.chartData
 
   useEffect(() => {
-    let canceled = false
     async function checkForChartData() {
       if (!chartData) {
         let data = await getPairChartData(exchangeSubgraphClient, pairAddress)
-        !canceled && updateChartData(pairAddress, data)
+        updateChartData(pairAddress, data, networksInfo.CHAIN_ID)
       }
     }
-    state?.[pairAddress] && checkForChartData()
-    return () => canceled = true
-  }, [state?.[pairAddress], chartData, pairAddress, updateChartData, exchangeSubgraphClient])
+    checkForChartData()
+  }, [chartData, pairAddress, updateChartData, exchangeSubgraphClient])
   return chartData
 }
 
@@ -781,5 +717,6 @@ export function usePairChartData(pairAddress) {
  */
 export function useAllPairData() {
   const [state] = usePairDataContext()
-  return state || {}
+  const [networksInfo] = useNetworksInfo()
+  return state?.[networksInfo?.CHAIN_ID] || {}
 }

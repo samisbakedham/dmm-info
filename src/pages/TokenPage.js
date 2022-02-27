@@ -12,6 +12,7 @@ import Column, { AutoColumn } from '../components/Column'
 import { ButtonDark, ButtonOutlined } from '../components/ButtonStyled'
 import TxnList from '../components/TxnList'
 import TokenChart from '../components/TokenChart'
+import NotFound from '../components/404'
 import { BasicLink } from '../components/Link'
 import Search from '../components/Search'
 import { formattedNum, formattedPercent, getEtherscanLinkText, getPoolLink, getSwapLink, localNumber } from '../utils'
@@ -31,6 +32,7 @@ import bookMark from '../assets/bookmark.svg'
 import bookMarkOutline from '../assets/bookmark_outline.svg'
 import useTheme from '../hooks/useTheme'
 import { useNetworksInfo } from '../contexts/NetworkInfo'
+import LocalLoader from '../components/LocalLoader'
 
 const DashboardWrapper = styled.div`
   width: 100%;
@@ -202,7 +204,15 @@ function TokenPage({ address, history }) {
   const { network: currentNetworkURL } = useParams()
   const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
 
-  return (
+  return !name ? (
+    <LocalLoader />
+  ) : name === 'error-token' ? (
+    <NotFound
+      type='token'
+      currentChainName={networksInfo.NAME}
+      redirectLink={prefixNetworkURL + '/tokens'}
+    />
+  ) : (
     <PageWrapper>
       <ThemedBackground backgroundColor={transparentize(0.6, backgroundColor)} />
 
