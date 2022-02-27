@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useMemo, useCallback, useState, useEffect } from 'react'
-import { timeframeOptions, getSUPPORTED_LIST_URLS__NO_ENS, getKNC_ADDRESS } from '../constants'
+import { timeframeOptions, getSUPPORTED_LIST_URLS__NO_ENS, getKNC_ADDRESS, ChainId } from '../constants'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import getTokenList from '../utils/tokenLists'
@@ -10,6 +10,12 @@ import { ApolloClient } from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { HttpLink } from 'apollo-link-http'
 
+import AVALANCHE_TOKEN_LIST from '../constants/tokenLists/avalanche.tokenlist'
+import ETHEREUM_TOKEN_LIST from '../constants/tokenLists/ethereum.tokenlist'
+import BSC_TOKEN_LIST from '../constants/tokenLists/bsc.tokenlist'
+import POLYGON_TOKEN_LIST from '../constants/tokenLists/polygon.tokenlist'
+import FANTOM_TOKEN_LIST from '../constants/tokenLists/fantom.tokenlist'
+import CRONOS_TOKEN_LIST from '../constants/tokenLists/cronos.tokenlist'
 dayjs.extend(utc)
 
 const UPDATE = 'UPDATE'
@@ -354,6 +360,33 @@ export function useListedTokens() {
       }, Promise.resolve([]))
       let formatted = allFetched?.map((t) => t.address.toLowerCase())
       formatted.push(getKNC_ADDRESS(networksInfo).toLowerCase())
+
+      let tokenslist = {}
+
+      switch (networksInfo.CHAIN_ID) {
+        case ChainId.AVAXMAINNET:
+          tokenslist = AVALANCHE_TOKEN_LIST
+          break
+        case ChainId.MAINNET:
+          tokenslist = ETHEREUM_TOKEN_LIST
+          break
+        case ChainId.BSCMAINNET:
+          tokenslist = BSC_TOKEN_LIST
+          break
+        case ChainId.MATIC:
+          tokenslist = POLYGON_TOKEN_LIST
+          break
+        case ChainId.FANTOM:
+          tokenslist = FANTOM_TOKEN_LIST
+          break
+        case ChainId.CRONOS:
+          tokenslist = CRONOS_TOKEN_LIST
+          break
+        default:
+          break
+      }
+
+      formatted = formatted.concat(Object.keys(tokenslist).map((item) => item.toLowerCase()))
       updateSupportedTokens(formatted)
     }
     if (!supportedTokens) {
