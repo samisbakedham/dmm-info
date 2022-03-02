@@ -237,7 +237,7 @@ function App() {
           path='/:network?/pool/:poolAddress'
           render={({ match }) => {
             if (PAIR_BLACKLIST.includes(match.params.poolAddress.toLowerCase())) {
-              return <Redirect to={`/${match.params.network}/home4`} />
+              return <Redirect to={`/${match.params.network}/home`} />
             }
             return (
               <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>
@@ -259,7 +259,7 @@ function App() {
                 </LayoutWrapper>
               )
             }
-            return <Redirect to={`/${match.params.network}/home5`} />
+            return <Redirect to={`/${match.params.network}/home`} />
           }}
         />
 

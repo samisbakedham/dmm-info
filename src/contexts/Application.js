@@ -108,7 +108,7 @@ function reducer(state, { type, payload }) {
         ...state,
         [EXCHANGE_SUBGRAPH_CLIENT]: {
           [chainId]: exchangeSubgraphClient,
-        }
+        },
       }
     }
 
@@ -127,7 +127,7 @@ const INITIAL_STATE = {
 
 export default function Provider({ children }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
-  const update = useCallback((currency) => {
+  const update = useCallback(currency => {
     dispatch({
       type: UPDATE,
       payload: {
@@ -137,7 +137,7 @@ export default function Provider({ children }) {
   }, [])
 
   // global time window for charts - see timeframe options in constants
-  const updateTimeframe = useCallback((newTimeFrame) => {
+  const updateTimeframe = useCallback(newTimeFrame => {
     dispatch({
       type: UPDATE_TIMEFRAME,
       payload: {
@@ -147,7 +147,7 @@ export default function Provider({ children }) {
   }, [])
 
   // used for refresh button
-  const updateSessionStart = useCallback((timestamp) => {
+  const updateSessionStart = useCallback(timestamp => {
     dispatch({
       type: UPDATE_SESSION_START,
       payload: {
@@ -156,7 +156,7 @@ export default function Provider({ children }) {
     })
   }, [])
 
-  const updateSupportedTokens = useCallback((supportedTokens) => {
+  const updateSupportedTokens = useCallback(supportedTokens => {
     dispatch({
       type: UPDATED_SUPPORTED_TOKENS,
       payload: {
@@ -170,7 +170,7 @@ export default function Provider({ children }) {
       type: UPDATE_LATEST_BLOCK,
       payload: {
         block,
-        chainId
+        chainId,
       },
     })
   }, [])
@@ -185,7 +185,7 @@ export default function Provider({ children }) {
     })
   }, [])
 
-  const updateOpenModal = useCallback((openModal) => {
+  const updateOpenModal = useCallback(openModal => {
     dispatch({
       type: UPDATE_OPEN_MODAL,
       payload: {
@@ -358,7 +358,7 @@ export function useListedTokens() {
         const newTokens = await getTokenList(url, networksInfo)
         return Promise.resolve([...tokensSoFar, ...newTokens.tokens])
       }, Promise.resolve([]))
-      let formatted = allFetched?.map((t) => t.address.toLowerCase())
+      let formatted = allFetched?.map(t => t.address.toLowerCase())
       formatted.push(getKNC_ADDRESS(networksInfo).toLowerCase())
 
       let tokenslist = {}
@@ -386,7 +386,7 @@ export function useListedTokens() {
           break
       }
 
-      formatted = formatted.concat(Object.keys(tokenslist).map((item) => item.toLowerCase()))
+      formatted = formatted.concat(Object.keys(tokenslist).map(item => item.toLowerCase()))
       updateSupportedTokens(formatted)
     }
     if (!supportedTokens) {
@@ -446,7 +446,7 @@ export function useExchangeClient() {
       }
 
       const subgraphClients = subgraphUrls.map(
-        (uri) =>
+        uri =>
           new ApolloClient({
             link: new HttpLink({
               uri,
@@ -456,13 +456,13 @@ export function useExchangeClient() {
           })
       )
 
-      const subgraphPromises = subgraphClients.map((client) =>
+      const subgraphPromises = subgraphClients.map(client =>
         client
           .query({
             query: SUBGRAPH_BLOCK_NUMBER(),
             fetchPolicy: 'network-only',
           })
-          .catch((e) => {
+          .catch(e => {
             console.error(e)
             return e
           })
@@ -470,7 +470,7 @@ export function useExchangeClient() {
 
       const subgraphQueryResults = await Promise.all(subgraphPromises)
 
-      const subgraphBlockNumbers = subgraphQueryResults.map((res) =>
+      const subgraphBlockNumbers = subgraphQueryResults.map(res =>
         res instanceof Error ? 0 : res?.data?._meta?.block?.number || 0
       )
 

@@ -23,6 +23,7 @@ import {
   getBlocksFromTimestamps,
   getTimestampsForChanges,
   splitQuery,
+  overwriteArrayMerge,
 } from '../utils'
 
 import { timeframeOptions, getWETH_ADDRESS } from '../constants'
@@ -41,9 +42,9 @@ dayjs.extend(utc)
 export function safeAccess(object, path) {
   return object
     ? path.reduce(
-      (accumulator, currentValue) => (accumulator && accumulator[currentValue] ? accumulator[currentValue] : null),
-      object
-    )
+        (accumulator, currentValue) => (accumulator && accumulator[currentValue] ? accumulator[currentValue] : null),
+        object
+      )
     : null
 }
 
@@ -56,31 +57,35 @@ function usePoolDataContext() {
 function reducer(state, { type, payload }) {
   switch (type) {
     case UPDATE: {
-      const { poolAddress, data, chainId } = payload;
+      const { poolAddress, data, chainId } = payload
       if (!data) return merge(state, { [chainId]: { [poolAddress]: { name: 'error-pool' } } })
       return merge(state, { [chainId]: { [poolAddress]: data } })
     }
 
     case UPDATE_TOP_POOLS: {
       const { topPools, chainId } = payload
-      let added = {};
-      topPools && topPools.forEach(pool => added[pool.id] = pool)
+      let added = {}
+      topPools && topPools.forEach(pool => (added[pool.id] = pool))
       return merge(state, { [chainId]: added })
     }
 
     case UPDATE_POOL_TXNS: {
       const { address, transactions, chainId } = payload
-      return merge(state, { [chainId]: { [address]: { txns: transactions } } })
+      return merge(state, { [chainId]: { [address]: { txns: transactions } } }, { arrayMerge: overwriteArrayMerge })
     }
 
     case UPDATE_CHART_DATA: {
       const { address, chartData, chainId } = payload
-      return merge(state, { [chainId]: { [address]: { chartData } } })
+      return merge(state, { [chainId]: { [address]: { chartData } } }, { arrayMerge: overwriteArrayMerge })
     }
 
     case UPDATE_HOURLY_DATA: {
       const { address, hourlyData, timeWindow, chainId } = payload
-      return merge(state, { [chainId]: { [address]: { hourlyData: { [timeWindow]: hourlyData } } } })
+      return merge(
+        state,
+        { [chainId]: { [address]: { hourlyData: { [timeWindow]: hourlyData } } } },
+        { arrayMerge: overwriteArrayMerge }
+      )
     }
 
     default: {
@@ -170,7 +175,7 @@ export async function getBulkPoolData(client, poolList, ethPrice, networksInfo) 
     })
 
     let [oneDayResult, twoDayResult, oneWeekResult] = await Promise.all(
-      [b1, b2, bWeek].map(async (block) => {
+      [b1, b2, bWeek].map(async block => {
         let result = client.query({
           query: POOLS_HISTORICAL_BULK(block, poolList),
           fetchPolicy: 'network-only',
@@ -193,35 +198,35 @@ export async function getBulkPoolData(client, poolList, ethPrice, networksInfo) 
 
     let poolData = await Promise.all(
       current &&
-      current.data.pools.map(async (pool) => {
-        let data = pool
-        let oneDayHistory = oneDayData?.[pool.id]
-        if (!oneDayHistory) {
-          let newData = await client.query({
-            query: POOL_DATA(pool.id, b1),
-            fetchPolicy: 'network-only',
-          })
-          oneDayHistory = newData.data.pools[0]
-        }
-        let twoDayHistory = twoDayData?.[pool.id]
-        if (!twoDayHistory) {
-          let newData = await client.query({
-            query: POOL_DATA(pool.id, b2),
-            fetchPolicy: 'network-only',
-          })
-          twoDayHistory = newData.data.pools[0]
-        }
-        let oneWeekHistory = oneWeekData?.[pool.id]
-        if (!oneWeekHistory) {
-          let newData = await client.query({
-            query: POOL_DATA(pool.id, bWeek),
-            fetchPolicy: 'network-only',
-          })
-          oneWeekHistory = newData.data.pools[0]
-        }
-        data = parseData(data, oneDayHistory, twoDayHistory, oneWeekHistory, ethPrice, b1, networksInfo)
-        return data
-      })
+        current.data.pools.map(async pool => {
+          let data = pool
+          let oneDayHistory = oneDayData?.[pool.id]
+          if (!oneDayHistory) {
+            let newData = await client.query({
+              query: POOL_DATA(pool.id, b1),
+              fetchPolicy: 'network-only',
+            })
+            oneDayHistory = newData.data.pools[0]
+          }
+          let twoDayHistory = twoDayData?.[pool.id]
+          if (!twoDayHistory) {
+            let newData = await client.query({
+              query: POOL_DATA(pool.id, b2),
+              fetchPolicy: 'network-only',
+            })
+            twoDayHistory = newData.data.pools[0]
+          }
+          let oneWeekHistory = oneWeekData?.[pool.id]
+          if (!oneWeekHistory) {
+            let newData = await client.query({
+              query: POOL_DATA(pool.id, bWeek),
+              fetchPolicy: 'network-only',
+            })
+            oneWeekHistory = newData.data.pools[0]
+          }
+          data = parseData(data, oneDayHistory, twoDayHistory, oneWeekHistory, ethPrice, b1, networksInfo)
+          return data
+        })
     )
 
     return poolData
@@ -406,7 +411,7 @@ const getHourlyRateData = async (client, poolAddress, startTime, latestBlock, fr
     }
 
     if (latestBlock) {
-      blocks = blocks.filter((b) => {
+      blocks = blocks.filter(b => {
         return parseFloat(b.number) <= parseFloat(latestBlock)
       })
     }
@@ -468,7 +473,7 @@ export function Updater() {
       })
 
       // format as array of addresses
-      const formattedPools = pools.map((pool) => {
+      const formattedPools = pools.map(pool => {
         return pool.id
       })
 
@@ -477,7 +482,7 @@ export function Updater() {
       !canceled && topPools && updateTopPools(topPools, networksInfo.CHAIN_ID)
     }
     ethPrice && getData()
-    return () => canceled = true
+    return () => (canceled = true)
   }, [ethPrice, updateTopPools, exchangeSubgraphClient, networksInfo])
   return null
 }
@@ -552,7 +557,7 @@ export function useDataForList(poolList) {
       let newFetched = []
       let unfetched = []
 
-      poolList.map(async (pool) => {
+      poolList.map(async pool => {
         let currentData = state?.[networksInfo.CHAIN_ID]?.[pool.id]
         if (!currentData) {
           unfetched.push(pool.id)
@@ -563,7 +568,7 @@ export function useDataForList(poolList) {
 
       let newPoolData = await getBulkPoolData(
         exchangeSubgraphClient,
-        unfetched.map((pool) => {
+        unfetched.map(pool => {
           return pool
         }),
         ethPrice,

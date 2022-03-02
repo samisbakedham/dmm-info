@@ -25,6 +25,7 @@ import {
   getBlocksFromTimestamps,
   getTimestampsForChanges,
   splitQuery,
+  overwriteArrayMerge,
 } from '../utils'
 
 import { timeframeOptions } from '../constants'
@@ -45,9 +46,9 @@ dayjs.extend(utc)
 export function safeAccess(object, path) {
   return object
     ? path.reduce(
-      (accumulator, currentValue) => (accumulator && accumulator[currentValue] ? accumulator[currentValue] : null),
-      object
-    )
+        (accumulator, currentValue) => (accumulator && accumulator[currentValue] ? accumulator[currentValue] : null),
+        object
+      )
     : null
 }
 
@@ -68,28 +69,32 @@ function reducer(state, { type, payload }) {
     case UPDATE_TOP_PAIRS: {
       const { topPairs, chainId } = payload
       let added = {}
-      topPairs && topPairs.forEach(pair => added[pair.id] = pair)
+      topPairs && topPairs.forEach(pair => (added[pair.id] = pair))
       return merge(state, { [chainId]: added })
     }
 
     case UPDATE_PAIR_POOLS: {
       const { address, pools, chainId } = payload
-      return merge(state, { [chainId]: { [address]: { pools } } })
+      return merge(state, { [chainId]: { [address]: { pools } } }, { arrayMerge: overwriteArrayMerge })
     }
 
     case UPDATE_PAIR_TXNS: {
       const { address, transactions, chainId } = payload
-      return merge(state, { [chainId]: { [address]: { txns: transactions } } })
+      return merge(state, { [chainId]: { [address]: { txns: transactions } } }, { arrayMerge: overwriteArrayMerge })
     }
 
     case UPDATE_CHART_DATA: {
       const { address, chartData, chainId } = payload
-      return merge(state, { [chainId]: { [address]: { chartData } } })
+      return merge(state, { [chainId]: { [address]: { chartData } } }, { arrayMerge: overwriteArrayMerge })
     }
 
     case UPDATE_HOURLY_DATA: {
       const { address, hourlyData, timeWindow, chainId } = payload
-      return merge(state, { [chainId]: { [address]: { hourlyData: { [timeWindow]: hourlyData } } } })
+      return merge(
+        state,
+        { [chainId]: { [address]: { hourlyData: { [timeWindow]: hourlyData } } } },
+        { arrayMerge: overwriteArrayMerge }
+      )
     }
 
     default: {
@@ -209,35 +214,35 @@ async function getBulkPairData(client, pairList, ethPrice, networksInfo) {
 
     let pairData = await Promise.all(
       current &&
-      current.data.pairs.map(async (pair) => {
-        let data = pair
-        let oneDayHistory = oneDayData?.[pair.id]
-        if (!oneDayHistory) {
-          let newData = await client.query({
-            query: PAIR_DATA(pair.id, b1),
-            fetchPolicy: 'cache-first',
-          })
-          oneDayHistory = newData.data.pairs[0]
-        }
-        let twoDayHistory = twoDayData?.[pair.id]
-        if (!twoDayHistory) {
-          let newData = await client.query({
-            query: PAIR_DATA(pair.id, b2),
-            fetchPolicy: 'cache-first',
-          })
-          twoDayHistory = newData.data.pairs[0]
-        }
-        let oneWeekHistory = oneWeekData?.[pair.id]
-        if (!oneWeekHistory) {
-          let newData = await client.query({
-            query: PAIR_DATA(pair.id, bWeek),
-            fetchPolicy: 'cache-first',
-          })
-          oneWeekHistory = newData.data.pairs[0]
-        }
-        data = parseData(data, oneDayHistory, twoDayHistory, oneWeekHistory, ethPrice, b1, networksInfo)
-        return data
-      })
+        current.data.pairs.map(async pair => {
+          let data = pair
+          let oneDayHistory = oneDayData?.[pair.id]
+          if (!oneDayHistory) {
+            let newData = await client.query({
+              query: PAIR_DATA(pair.id, b1),
+              fetchPolicy: 'cache-first',
+            })
+            oneDayHistory = newData.data.pairs[0]
+          }
+          let twoDayHistory = twoDayData?.[pair.id]
+          if (!twoDayHistory) {
+            let newData = await client.query({
+              query: PAIR_DATA(pair.id, b2),
+              fetchPolicy: 'cache-first',
+            })
+            twoDayHistory = newData.data.pairs[0]
+          }
+          let oneWeekHistory = oneWeekData?.[pair.id]
+          if (!oneWeekHistory) {
+            let newData = await client.query({
+              query: PAIR_DATA(pair.id, bWeek),
+              fetchPolicy: 'cache-first',
+            })
+            oneWeekHistory = newData.data.pairs[0]
+          }
+          data = parseData(data, oneDayHistory, twoDayHistory, oneWeekHistory, ethPrice, b1, networksInfo)
+          return data
+        })
     )
 
     return pairData
@@ -416,7 +421,8 @@ const getPairChartData = async (client, pairAddress) => {
 
 let cacheGetRateData = {}
 const getRateData = async (client, pairAddress, startTime, latestBlock, networksInfo, frequency = 300) => {
-  if (cacheGetRateData?.[networksInfo.CHAIN_ID]?.[pairAddress + startTime + latestBlock + frequency]) return await cacheGetRateData[networksInfo.CHAIN_ID][pairAddress + startTime + latestBlock + frequency]
+  if (cacheGetRateData?.[networksInfo.CHAIN_ID]?.[pairAddress + startTime + latestBlock + frequency])
+    return await cacheGetRateData[networksInfo.CHAIN_ID][pairAddress + startTime + latestBlock + frequency]
   if (!cacheGetRateData?.[networksInfo.CHAIN_ID]) cacheGetRateData[networksInfo.CHAIN_ID] = {}
   let promise = new Promise(async (resolve, reject) => {
     try {
@@ -446,7 +452,7 @@ const getRateData = async (client, pairAddress, startTime, latestBlock, networks
       }
 
       if (latestBlock) {
-        blocks = blocks.filter((b) => {
+        blocks = blocks.filter(b => {
           return parseFloat(b.number) <= parseFloat(latestBlock)
         })
       }
@@ -518,7 +524,7 @@ export function Updater() {
       !canceled && topPairs && updateTopPairs(topPairs, networksInfo.CHAIN_ID)
     }
     ethPrice && getData()
-    return () => canceled = true
+    return () => (canceled = true)
   }, [ethPrice, updateTopPairs, exchangeSubgraphClient, networksInfo])
   return null
 }
@@ -576,15 +582,24 @@ export function useDataForList(pairList) {
   const [state] = usePairDataContext()
   const [ethPrice] = useEthPrice()
 
+  const [stale, setStale] = useState(false)
   const [fetched, setFetched] = useState()
   const [networksInfo] = useNetworksInfo()
+
+  // reset
+  useEffect(() => {
+    if (pairList) {
+      setStale(false)
+      setFetched()
+    }
+  }, [pairList])
 
   useEffect(() => {
     async function fetchNewPairData() {
       let newFetched = []
       let unfetched = []
 
-      pairList.forEach((pair) => {
+      pairList.forEach(pair => {
         let currentData = state?.[networksInfo.CHAIN_ID]?.[pair.id]
         if (!currentData) {
           unfetched.push(pair.id)
@@ -595,18 +610,19 @@ export function useDataForList(pairList) {
 
       let newPairData = await getBulkPairData(
         exchangeSubgraphClient,
-        unfetched.map((pair) => {
+        unfetched.map(pair => {
           return pair
         }),
         ethPrice,
-        networksInfo,
+        networksInfo
       )
       setFetched(newFetched.concat(newPairData ? newPairData : []), networksInfo.CHAIN_ID)
     }
-    if (ethPrice && pairList && pairList.length > 0 && !fetched?.length) {
+    if (ethPrice && pairList && pairList.length > 0 && !fetched?.length && !stale) {
+      setStale(true)
       fetchNewPairData()
     }
-  }, [ethPrice, state, pairList, fetched, exchangeSubgraphClient, networksInfo])
+  }, [ethPrice, state, pairList, stale, fetched, exchangeSubgraphClient, networksInfo])
 
   let formattedFetch =
     fetched &&
@@ -658,7 +674,7 @@ export function usePairPools(pairAddress) {
         let pools = await getPairPools(exchangeSubgraphClient, pairAddress)
 
         // format as array of addresses
-        const formattedPools = pools.map((pool) => {
+        const formattedPools = pools.map(pool => {
           return pool.id
         })
 

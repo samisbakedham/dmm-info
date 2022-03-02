@@ -8,7 +8,7 @@ import ModalHeader from '../ModalHeader'
 import { ButtonEmpty } from '../ButtonStyled'
 import { useOnClickOutside } from '../../hooks'
 import { NetworksInfoEnv, useNetworksInfo } from '../../contexts/NetworkInfo'
-import { useHistory, useParams } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 
 const ModalContentWrapper = styled.div`
   display: flex;
@@ -102,31 +102,61 @@ export default function NetworkModal() {
               return (
                 <SelectNetworkButton key={index} padding="0">
                   <ListItem selected>
-                    <img src={NETWORK_ICON[network.CHAIN_ID]} alt="Switch Network" style={{ width: '2rem', marginRight: '1rem' }} />
+                    <img
+                      src={NETWORK_ICON[network.CHAIN_ID]}
+                      alt="Switch Network"
+                      style={{ width: '2rem', marginRight: '1rem' }}
+                    />
                     <NetworkLabel>{network.NAME}</NetworkLabel>
                   </ListItem>
                 </SelectNetworkButton>
               )
             }
 
+            let currentUrl = currentNetworkURL
+              ? history.location.pathname.split('/').slice(2).join('/')
+              : history.location.pathname.split('/').slice(1).join('/')
+            // Temporary solution for switch chain from token/pair/... detail page
+            // Currently we redirect to new chain with current address
+            // But that will causing 404 because each token on each chain has different address
+            // E.g: Token Tether USDT on BSC has address: 0x000 and on Fantom: 0x111
+            // When change from bsc to Fantom, we redirect to /fantom/0x000 and that will causing 404
+            // So we have temporary solution that always redirect to token/pair/... list when we are current at token/pair/... detail
+            // TODO: Find current token/pair's new address on new chain. If it's not existing, redirect to token/pair/... list
+            switch (currentUrl.split('/')[0]) {
+              case 'token':
+                currentUrl = 'tokens'
+                break
+              case 'pair':
+                currentUrl = 'pairs'
+                break
+              case 'pool':
+                currentUrl = 'pairs'
+                break
+              case 'account':
+                currentUrl = 'accounts'
+                break
+            }
+            const linkTo = `/${network.URL_KEY}/` + currentUrl
             return (
-              <SelectNetworkButton
-                key={index}
-                padding="0"
-                onClick={() => {
-                  toggleNetworkModal()
-                  const currentUrl = currentNetworkURL
-                    ? history.location.pathname.split('/').slice(2).join('/')
-                    : history.location.pathname.split('/').slice(1).join('/')
-                  const redirectURL = `/${network.URL_KEY}/` + currentUrl
-                  history.push(redirectURL)
-                }}
-              >
-                <ListItem>
-                  <img src={NETWORK_ICON[network.CHAIN_ID]} alt="Switch Network" style={{ width: '2rem', marginRight: '1rem' }} />
-                  <NetworkLabel>{network.NAME}</NetworkLabel>
-                </ListItem>
-              </SelectNetworkButton>
+              <Link to={linkTo}>
+                <SelectNetworkButton
+                  key={index}
+                  padding="0"
+                  onClick={() => {
+                    toggleNetworkModal()
+                  }}
+                >
+                  <ListItem>
+                    <img
+                      src={NETWORK_ICON[network.CHAIN_ID]}
+                      alt="Switch Network"
+                      style={{ width: '2rem', marginRight: '1rem' }}
+                    />
+                    <NetworkLabel>{network.NAME}</NetworkLabel>
+                  </ListItem>
+                </SelectNetworkButton>
+              </Link>
             )
           })}
         </NetworkList>

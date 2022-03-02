@@ -15,15 +15,15 @@ export const timeframeOptions = {
 
 // token list urls to fetch tokens from - use for warnings on tokens and pairs
 export const getSUPPORTED_LIST_URLS__NO_ENS = networkInfo =>
-  String(networkInfo.CHAIN_ID) === 137
+  networkInfo.CHAIN_ID === 137
     ? ['https://unpkg.com/quickswap-default-token-list@1.0.72/build/quickswap-default.tokenlist.json']
-    : String(networkInfo.CHAIN_ID) === 56
-      ? ['https://tokens.pancakeswap.finance/pancakeswap-extended.json']
-      : String(networkInfo.CHAIN_ID) === 43114
-        ? ['https://raw.githubusercontent.com/pangolindex/tokenlists/main/ab.tokenlist.json']
-        : String(networkInfo.CHAIN_ID === 250)
-          ? ['https://raw.githubusercontent.com/SpookySwap/spooky-info/master/src/constants/token/spookyswap.json']
-          : ['https://gateway.ipfs.io/ipns/tokens.uniswap.org']
+    : networkInfo.CHAIN_ID === 56
+    ? ['https://tokens.pancakeswap.finance/pancakeswap-extended.json']
+    : networkInfo.CHAIN_ID === 43114
+    ? ['https://raw.githubusercontent.com/pangolindex/tokenlists/main/ab.tokenlist.json']
+    : networkInfo.CHAIN_ID === 250
+    ? ['https://raw.githubusercontent.com/SpookySwap/spooky-info/master/src/constants/token/spookyswap.json']
+    : ['https://gateway.ipfs.io/ipns/tokens.uniswap.org']
 
 // hide from overview list
 export const OVERVIEW_TOKEN_BLACKLIST = [
@@ -61,9 +61,7 @@ export const getWETH_ADDRESS = networkInfo => String(networkInfo.WETH_ADDRESS) |
 export const getKNC_ADDRESS = networkInfo => String(networkInfo.KNC_ADDRESS) || '0xdeFA4e8a7bcBA345F687a2f1456F5Edd9CE97202'
 
 export const getKNCL_ADDRESS = networkInfo =>
-  String(networkInfo.CHAIN_ID) === '1'
-    ? '0xdd974D5C2e2928deA5F71b9825b8b646686BD200'
-    : '0x7B2810576aa1cce68F2B118CeF1F36467c648F92'
+  networkInfo.CHAIN_ID === 1 ? '0xdd974D5C2e2928deA5F71b9825b8b646686BD200' : '0x7B2810576aa1cce68F2B118CeF1F36467c648F92'
 
 export const ANALYTICS_URLS = {
   1: 'https://analytics.kyberswap.com',

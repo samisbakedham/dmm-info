@@ -59,16 +59,19 @@ export function getPoolLink(token0Address, networkInfo, token1Address = null, re
     if (!token1Address) {
       return addNetworkIdQueryString(
         networkInfo.DMM_SWAP_URL +
-        (remove ? `remove` : `add`) +
-        `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${nativeTokenSymbol}/${poolAddress}`,
+          (remove ? `remove` : `add`) +
+          `/${
+            token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address
+          }/${nativeTokenSymbol}/${poolAddress}`,
         networkInfo
       )
     } else {
       return addNetworkIdQueryString(
         networkInfo.DMM_SWAP_URL +
-        (remove ? `remove` : `add`) +
-        `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address
-        }/${poolAddress}`,
+          (remove ? `remove` : `add`) +
+          `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${
+            token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address
+          }/${poolAddress}`,
         networkInfo
       )
     }
@@ -77,16 +80,17 @@ export function getPoolLink(token0Address, networkInfo, token1Address = null, re
   if (!token1Address) {
     return addNetworkIdQueryString(
       networkInfo.DMM_SWAP_URL +
-      (remove ? `remove` : `add`) +
-      `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${nativeTokenSymbol}`,
+        (remove ? `remove` : `add`) +
+        `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${nativeTokenSymbol}`,
       networkInfo
     )
   } else {
     return addNetworkIdQueryString(
       networkInfo.DMM_SWAP_URL +
-      (remove ? `remove` : `add`) +
-      `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address
-      }`,
+        (remove ? `remove` : `add`) +
+        `/${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address}/${
+          token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address
+        }`,
       networkInfo
     )
   }
@@ -99,7 +103,8 @@ export function getSwapLink(token0Address, networkInfo, token1Address = null) {
     return addNetworkIdQueryString(`${networkInfo.DMM_SWAP_URL}swap?inputCurrency=${token0Address}`, networkInfo)
   } else {
     return addNetworkIdQueryString(
-      `${networkInfo.DMM_SWAP_URL}swap?inputCurrency=${token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address
+      `${networkInfo.DMM_SWAP_URL}swap?inputCurrency=${
+        token0Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token0Address
       }&outputCurrency=${token1Address === getWETH_ADDRESS(networkInfo) ? nativeTokenSymbol : token1Address}`,
       networkInfo
     )
@@ -110,12 +115,12 @@ export function localNumber(val) {
   return Numeral(val).format('0,0')
 }
 
-export const toNiceDate = (date) => {
+export const toNiceDate = date => {
   let x = dayjs.utc(dayjs.unix(date)).format('MMM DD')
   return x
 }
 
-export const toWeeklyDate = (date) => {
+export const toWeeklyDate = date => {
   const formatted = dayjs.utc(dayjs.unix(date))
   date = new Date(formatted)
   const day = new Date(formatted).getDay()
@@ -150,7 +155,7 @@ export async function splitQuery(query, localClient, vars, list, skipCount = 100
 
   let res = await Promise.all(promises)
 
-  res.forEach((result) => {
+  res.forEach(result => {
     fetchedData = {
       ...fetchedData,
       ...result.data,
@@ -174,8 +179,7 @@ export async function getBlockFromTimestamp(timestamp, networkInfo) {
   if (cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID]?.[timestamp]) {
     promise = cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID]?.[timestamp]
   } else {
-    if (!cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID])
-      cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID] = {}
+    if (!cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID]) cacheGetBlockFromTimestamp[networkInfo.CHAIN_ID] = {}
     promise = getBlockClient(networkInfo).query({
       query: GET_BLOCK,
       variables: {
@@ -202,10 +206,8 @@ export async function getBlocksFromTimestamps(timestamps, networkInfo, skipCount
     return []
   }
 
-  timestamps = timestamps.map((t) =>
-    parseInt(t) < parseInt(networkInfo.DEFAULT_START_TIME)
-      ? parseInt(networkInfo.DEFAULT_START_TIME)
-      : t
+  timestamps = timestamps.map(t =>
+    parseInt(t) < parseInt(networkInfo.DEFAULT_START_TIME) ? parseInt(networkInfo.DEFAULT_START_TIME) : t
   )
 
   let fetchedData = await splitQuery(GET_BLOCKS, getBlockClient(networkInfo), [], timestamps, skipCount)
@@ -324,9 +326,9 @@ export function getTimestampRange(timestamp_from, period_length, periods) {
   return timestamps
 }
 
-export const toNiceDateYear = (date) => dayjs.utc(dayjs.unix(date)).format('MMMM DD h:mm A, YYYY')
+export const toNiceDateYear = date => dayjs.utc(dayjs.unix(date)).format('MMMM DD h:mm A, YYYY')
 
-export const isAddress = (value) => {
+export const isAddress = value => {
   try {
     return ethers.utils.getAddress(value.toLowerCase())
   } catch {
@@ -334,22 +336,22 @@ export const isAddress = (value) => {
   }
 }
 
-export const toK = (num) => {
+export const toK = num => {
   return Numeral(num).format('0.[00]a')
 }
 
-export const setThemeColor = (theme) => document.documentElement.style.setProperty('--c-token', theme || '#333333')
+export const setThemeColor = theme => document.documentElement.style.setProperty('--c-token', theme || '#333333')
 
-export const Big = (number) => new BigNumber(number)
+export const Big = number => new BigNumber(number)
 
 export const getUrls = networkInfo => ({
-  showTransaction: (tx) => `${networkInfo.ETHERSCAN_URL}/tx/${tx}/`,
-  showAddress: (address) => `${networkInfo.ETHERSCAN_URL}/address/${address}/`,
-  showToken: (address) => `${networkInfo.ETHERSCAN_URL}/token/${address}/`,
-  showBlock: (block) => `${networkInfo.ETHERSCAN_URL}/block/${block}/`,
+  showTransaction: tx => `${networkInfo.ETHERSCAN_URL}/tx/${tx}/`,
+  showAddress: address => `${networkInfo.ETHERSCAN_URL}/address/${address}/`,
+  showToken: address => `${networkInfo.ETHERSCAN_URL}/token/${address}/`,
+  showBlock: block => `${networkInfo.ETHERSCAN_URL}/block/${block}/`,
 })
 
-export const formatTime = (unix) => {
+export const formatTime = unix => {
   const now = dayjs()
   const timestamp = dayjs.unix(unix)
 
@@ -369,7 +371,7 @@ export const formatTime = (unix) => {
   }
 }
 
-export const formatNumber = (num) => {
+export const formatNumber = num => {
   return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
@@ -444,7 +446,7 @@ export function formattedPercent(percent, useBrackets = false) {
 
   if (percent < 0.0001 && percent > 0) {
     return (
-      <Text fontWeight={500} color="#31CB9E">
+      <Text fontWeight={500} color='#31CB9E'>
         {'< 0.0001%'}
       </Text>
     )
@@ -452,7 +454,7 @@ export function formattedPercent(percent, useBrackets = false) {
 
   if (percent < 0 && percent > -0.0001) {
     return (
-      <Text fontWeight={500} color="#FF537B">
+      <Text fontWeight={500} color='#FF537B'>
         {'< 0.0001%'}
       </Text>
     )
@@ -465,17 +467,17 @@ export function formattedPercent(percent, useBrackets = false) {
   if (fixedPercent > 0) {
     if (fixedPercent > 100) {
       return (
-        <Text fontWeight={500} color="#31CB9E">
+        <Text fontWeight={500} color='#31CB9E'>
           <OverflowTooltip text={`+${percent?.toFixed(0).toLocaleString('en-US')}%`}>{`+${percent
             ?.toFixed(0)
             .toLocaleString('en-US')}%`}</OverflowTooltip>
         </Text>
       )
     } else {
-      return <Text fontWeight={500} color="#31CB9E">{`+${fixedPercent}%`}</Text>
+      return <Text fontWeight={500} color='#31CB9E'>{`+${fixedPercent}%`}</Text>
     }
   } else {
-    return <Text fontWeight={500} color="#FF537B">{`${fixedPercent}%`}</Text>
+    return <Text fontWeight={500} color='#FF537B'>{`${fixedPercent}%`}</Text>
   }
 }
 
@@ -483,7 +485,7 @@ export function formattedTokenRatio(percent) {
   percent = parseFloat(percent)
 
   return (
-    <Text fontWeight={500} marginLeft="4px">
+    <Text fontWeight={500} marginLeft='4px'>
       {percent.toFixed(2)}%
     </Text>
   )
@@ -514,8 +516,7 @@ export const get2DayPercentChange = (valueNow, value24HoursAgo, value48HoursAgo)
  * @param {*} value24HoursAgo
  */
 export const getPercentChange = (valueNow, value24HoursAgo) => {
-  const adjustedPercentChange =
-    ((parseFloat(valueNow) - parseFloat(value24HoursAgo)) / parseFloat(value24HoursAgo)) * 100
+  const adjustedPercentChange = ((parseFloat(valueNow) - parseFloat(value24HoursAgo)) / parseFloat(value24HoursAgo)) * 100
   if (isNaN(adjustedPercentChange) || !isFinite(adjustedPercentChange)) {
     return 0
   }
@@ -698,4 +699,23 @@ export const formatBigLiquidity = (num, decimals, usd = true) => {
   const formattedValue = item ? (parseFloat(num) / item.value).toFixed(decimals).replace(rx, '$1') + item.symbol : '0'
 
   return usd ? `$${formattedValue}` : formattedValue
+}
+
+export const overwriteArrayMerge = (destinationArray, sourceArray, options) => sourceArray
+
+const cacheMemoRequest = {}
+export const memoRequest = async (request, key) => {
+  if (cacheMemoRequest[key]) {
+    return await cacheMemoRequest[key]
+  }
+  cacheMemoRequest[key] = request()
+  let result
+  try {
+    result = await cacheMemoRequest[key]
+    cacheMemoRequest[key] = null
+  } catch (e) {
+    cacheMemoRequest[key] = null
+    throw e
+  }
+  return result
 }

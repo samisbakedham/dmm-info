@@ -559,25 +559,20 @@ export function useGlobalData() {
   }, [exchangeSubgraphClient, update, updateAllPairsInUniswap, updateAllTokensInUniswap])
 
   useEffect(() => {
-    let canceled = false
     async function fetchData() {
       let globalData = await getGlobalData(exchangeSubgraphClient, ethPrice, oldEthPrice, networksInfo)
-      if (canceled) return
       globalData && update(globalData)
 
       let allPairs = await getAllPairsOnUniswap(exchangeSubgraphClient)
-      if (canceled) return
       updateAllPairsInUniswap(allPairs)
 
       let allTokens = await getAllTokensOnUniswap(exchangeSubgraphClient)
-      if (canceled) return
       updateAllTokensInUniswap(allTokens)
     }
 
     if (!data && ethPrice && oldEthPrice) {
       fetchData()
     }
-    return () => canceled = true
   }, [ethPrice, oldEthPrice, update, data, updateAllPairsInUniswap, updateAllTokensInUniswap, exchangeSubgraphClient, networksInfo])
 
   return data || {}
@@ -614,16 +609,14 @@ export function useGlobalChartData() {
    * Fetch data if none fetched or older data is needed
    */
   useEffect(() => {
-    let canceled = false
     async function fetchData() {
       // historical stuff for chart
       let [newChartData, newWeeklyData] = await getChartData(exchangeSubgraphClient, oldestDateFetch)
-      !canceled && updateChart(newChartData, newWeeklyData)
+      updateChart(newChartData, newWeeklyData)
     }
     if (oldestDateFetch && !(chartDataDaily && chartDataWeekly)) {
       fetchData()
     }
-    return () => canceled = true
   }, [chartDataDaily, chartDataWeekly, oldestDateFetch, updateChart, exchangeSubgraphClient])
 
   return [chartDataDaily, chartDataWeekly]
@@ -639,15 +632,13 @@ export function useGlobalTransactions() {
   }, [exchangeSubgraphClient, updateTransactions])
 
   useEffect(() => {
-    let canceled = false
     async function fetchData() {
       if (!transactions) {
         let txns = await getGlobalTransactions(exchangeSubgraphClient)
-        !canceled && updateTransactions(txns)
+        updateTransactions(txns)
       }
     }
     fetchData()
-    return () => canceled = true
   }, [updateTransactions, transactions, exchangeSubgraphClient])
   return transactions
 }
@@ -669,17 +660,13 @@ export function useEthPrice() {
   }, [networksInfo, updateEthPrice])
 
   useEffect(() => {
-    let canceled = false
     async function checkForEthPrice() {
       if (!ethPrice) {
         let [newPrice, oneDayPrice, priceChange] = await getEthPrice(exchangeSubgraphClient, networksInfo)
-        !canceled && updateEthPrice(networksInfo.CHAIN_ID, newPrice, oneDayPrice, priceChange)
+        updateEthPrice(networksInfo.CHAIN_ID, newPrice, oneDayPrice, priceChange)
       }
     }
     checkForEthPrice()
-    return () => {
-      canceled = true
-    }
   }, [ethPrice, updateEthPrice, exchangeSubgraphClient, networksInfo])
 
   return [ethPrice, ethPriceOld]
@@ -711,7 +698,6 @@ export function useTopLps() {
   const allPools = useAllPoolData()
 
   useEffect(() => {
-    let canceled = false
     async function fetchData() {
       // get top 20 by reserves
       let topPools = Object.keys(allPools)
@@ -760,13 +746,12 @@ export function useTopLps() {
 
       const sorted = topLps.sort((a, b) => (a.usd > b.usd ? -1 : 1))
       const shorter = sorted.splice(0, 100)
-      !canceled && updateTopLps(shorter)
+      updateTopLps(shorter)
     }
 
     if (!topLps && allPools && Object.keys(allPools).length > 0) {
       fetchData()
     }
-    return () => canceled = true
   })
 
   return topLps
