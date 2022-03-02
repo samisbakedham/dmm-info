@@ -730,5 +730,5 @@ export function useTokenPriceData(tokenAddress, timeWindow, interval = 3600) {
 export function useAllTokenData() {
   const [state] = useTokenDataContext()
   const [networksInfo] = useNetworksInfo()
-  return state?.[networksInfo.CHAIN_ID]
+  return state?.[networksInfo.CHAIN_ID] || {}
 }
