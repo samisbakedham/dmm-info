@@ -77,7 +77,6 @@
   "scripts": {
     "start": "env-cmd -f .env.production react-scripts start",
     "start-testnet": "env-cmd -f .env.testnet react-scripts start",
-    "start-staging": "env-cmd -f .env.staging react-scripts start",
     "start-production": "env-cmd -f .env.production react-scripts start",
     "build": "env-cmd -f .env.production react-scripts build",
     "build-testnet": "env-cmd -f .env.testnet react-scripts build",

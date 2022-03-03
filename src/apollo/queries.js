@@ -525,6 +525,7 @@ export const GLOBAL_DATA = (networksInfo, block) => {
         pairCount
       }
     }`
+
   return gql(queryString)
 }
 

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-import { ROPSTEN_TOKEN_LOGOS_MAPPING, getWETH_ADDRESS } from '../../constants'
+import { ROPSTEN_TOKEN_LOGOS_MAPPING, getWETH_ADDRESS, ChainId } from '../../constants'
 import ETHEREUM_TOKEN_LIST from '../../constants/tokenLists/ethereum.tokenlist'
 import POLYGON_TOKEN_LIST from '../../constants/tokenLists/polygon.tokenlist'
 import BSC_TOKEN_LIST from '../../constants/tokenLists/bsc.tokenlist'
 import AVALANCHE_TOKEN_LIST from '../../constants/tokenLists/avalanche.tokenlist'
 import FANTOM_TOKEN_LIST from '../../constants/tokenLists/fantom.tokenlist'
 import CRONOS_TOKEN_LIST from '../../constants/tokenLists/cronos.tokenlist'
+import ARBITRUM_TOKEN_LIST from '../../constants/tokenLists/arbitrum.tokenlist'
+import BTTC_TOKEN_LIST from '../../constants/tokenLists/bttc.tokenlist'
 import { isAddress } from '../../utils/index.js'
 import PlaceHolder from '../../assets/placeholder.png'
 import EthereumLogo from '../../assets/eth.png'
@@ -62,7 +64,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -75,7 +77,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -89,7 +91,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -103,7 +105,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -116,7 +118,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -130,7 +132,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -144,7 +146,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -157,7 +159,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -170,7 +172,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -183,7 +185,7 @@ export function getNativeTokenLogo({ size = '24px', chainId, ...rest }) {
               boxShadow: '0px 6px 10px rgba(0, 0, 0, 0.075)',
               borderRadius: '24px',
             }}
-            alt=""
+            alt=''
           />
         </StyledNativeTokenLogo>
       )
@@ -198,7 +200,7 @@ export function getCustomLogo({ address, chainId, src, size, setError, ...rest }
         alt={''}
         src={src}
         size={size}
-        onError={(event) => {
+        onError={event => {
           BAD_IMAGES[chainId] = { ...BAD_IMAGES[chainId], [address]: true }
           setError(true)
           event.preventDefault()
@@ -241,7 +243,14 @@ export default function TokenLogo({ address, header = false, size = '24px', ...r
       break
     case 137:
       if (formattedAddress && POLYGON_TOKEN_LIST[formattedAddress]) {
-        return getCustomLogo({ address, chainId: networksInfo.CHAIN_ID, src: POLYGON_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+        return getCustomLogo({
+          address,
+          chainId: networksInfo.CHAIN_ID,
+          src: POLYGON_TOKEN_LIST[formattedAddress].logoURI,
+          size,
+          setError,
+          ...rest,
+        })
       }
 
       path = getMaticTokenLogoURL(address)
@@ -254,35 +263,83 @@ export default function TokenLogo({ address, header = false, size = '24px', ...r
       break
     case 56:
       if (formattedAddress && BSC_TOKEN_LIST[formattedAddress]) {
-        return getCustomLogo({ address, chainId: networksInfo.CHAIN_ID, src: BSC_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+        return getCustomLogo({
+          address,
+          chainId: networksInfo.CHAIN_ID,
+          src: BSC_TOKEN_LIST[formattedAddress].logoURI,
+          size,
+          setError,
+          ...rest,
+        })
       }
       path = getBscTokenLogoURL(address)
       break
 
     case 43114:
       if (formattedAddress && AVALANCHE_TOKEN_LIST[formattedAddress]) {
-        return getCustomLogo({ address, chainId: networksInfo.CHAIN_ID, src: AVALANCHE_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+        return getCustomLogo({
+          address,
+          chainId: networksInfo.CHAIN_ID,
+          src: AVALANCHE_TOKEN_LIST[formattedAddress].logoURI,
+          size,
+          setError,
+          ...rest,
+        })
       }
       path = getAvaxTokenLogoURL(address)
       break
 
     case 250:
       if (formattedAddress && FANTOM_TOKEN_LIST[formattedAddress]) {
-        return getCustomLogo({ address, chainId: networksInfo.CHAIN_ID, src: FANTOM_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+        return getCustomLogo({
+          address,
+          chainId: networksInfo.CHAIN_ID,
+          src: FANTOM_TOKEN_LIST[formattedAddress].logoURI,
+          size,
+          setError,
+          ...rest,
+        })
       }
       path = getFantomTokenLogoURL(address)
       break
 
     case 25:
       if (formattedAddress && CRONOS_TOKEN_LIST[formattedAddress]) {
-        return getCustomLogo({ address, chainId: networksInfo.CHAIN_ID, src: CRONOS_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+        return getCustomLogo({
+          address,
+          chainId: networksInfo.CHAIN_ID,
+          src: CRONOS_TOKEN_LIST[formattedAddress].logoURI,
+          size,
+          setError,
+          ...rest,
+        })
       }
       path = getCronosTokenLogoURL(address)
       break
 
+    case `${ChainId.ARBITRUM}`:
+      if (formattedAddress && ARBITRUM_TOKEN_LIST[formattedAddress]) {
+        return getCustomLogo({ address, src: ARBITRUM_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+      }
+      path = `https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/arbitrum/assets/${isAddress(address)}/logo.png`
+      break
+
+    case `${ChainId.BTTC}`:
+      if (formattedAddress && BTTC_TOKEN_LIST[formattedAddress]) {
+        return getCustomLogo({ address, src: BTTC_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+      }
+      break
+
     default:
       if (formattedAddress && ETHEREUM_TOKEN_LIST[formattedAddress]?.logoURI) {
-        return getCustomLogo({ address, chainId: networksInfo.CHAIN_ID, src: ETHEREUM_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
+        return getCustomLogo({
+          address,
+          chainId: networksInfo.CHAIN_ID,
+          src: ETHEREUM_TOKEN_LIST[formattedAddress].logoURI,
+          size,
+          setError,
+          ...rest,
+        })
       }
 
       // hard coded fixes for trust wallet api issues
@@ -304,9 +361,9 @@ export default function TokenLogo({ address, header = false, size = '24px', ...r
         {...rest}
         alt={''}
         src={path}
-        srcSet=""
+        srcSet=''
         size={size}
-        onError={(event) => {
+        onError={event => {
           BAD_IMAGES[networksInfo.CHAIN_ID] = { ...BAD_IMAGES[networksInfo.CHAIN_ID], [address]: true }
           setError(true)
           event.preventDefault()

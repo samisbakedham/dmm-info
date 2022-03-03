@@ -8,7 +8,7 @@ import TokenPage from './pages/TokenPage'
 import PairPage from './pages/PairPage'
 import PoolPage from './pages/PoolPage'
 import { useGlobalData, useGlobalChartData } from './contexts/GlobalData'
-import { getNetworkName, isAddress } from './utils'
+import { isAddress } from './utils'
 import AccountPage from './pages/AccountPage'
 import AllTokensPage from './pages/AllTokensPage'
 import AllPairsPage from './pages/AllPairsPage'
@@ -66,6 +66,7 @@ const Right = styled.div`
 const Center = styled.div`
   position: relative;
   height: 100%;
+  min-height: 100vh;
   z-index: 10;
   transition: width 0.25s ease;
   background-color: ${({ theme }) => theme.buttonBlack};
@@ -133,7 +134,7 @@ function AppLogicWrapper(props) {
               <Text fontWeight={500} fontSize={14} color={'#ffaf01'} style={{ display: 'inline' }} mr={'8px'}>
                 Warning:
               </Text>
-              {`The data on this site has only synced to ${getNetworkName(networksInfo)} block ${latestBlock} (out of ${headBlock}). Please check back soon.`}
+              {`The data on this site has only synced to ${networksInfo.NAME} block ${latestBlock} (out of ${headBlock}). Please check back soon.`}
             </div>
 
             <CloseButtonWrapper>
