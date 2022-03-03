@@ -145,9 +145,15 @@ function AppLogicWrapper(props) {
           </WarningBanner>
         </WarningWrapper>
       )}
-      {latestBlock && globalData && Object.keys(globalData).length > 0 && globalChartData && Object.keys(globalChartData).length > 0
-        ? props.children : <LocalLoader fill="true" size="200px" />
-      }
+      {latestBlock &&
+      globalData &&
+      Object.keys(globalData).length > 0 &&
+      globalChartData &&
+      Object.keys(globalChartData).length > 0 ? (
+        props.children
+      ) : (
+        <LocalLoader fill='true' size='200px' />
+      )}
       {/* {props.children} */}
     </AppWrapper>
   )
@@ -157,7 +163,7 @@ function AppLogicWrapper(props) {
  * Wrap the component with the header and sidebar pinned tab
  * And read network params from url, then validate it
  */
-const LayoutWrapper = (props) => {
+const LayoutWrapper = props => {
   const { network: currentNetworkURL } = useParams()
   const [networksInfo, updateChain] = useNetworksInfo()
   let networkInfoFromURL = NetworksInfoEnv.find(networkInfo => networkInfo.URL_KEY === currentNetworkURL)
@@ -168,7 +174,7 @@ const LayoutWrapper = (props) => {
     } else if (networkInfoFromURL) {
       updateChain(networkInfoFromURL.ENV_KEY)
     }
-  }, [currentNetworkURL, networkInfoFromURL, updateChain]);
+  }, [currentNetworkURL, networkInfoFromURL, updateChain])
   if (currentNetworkURL && !networkInfoFromURL) return <Redirect to='/home' />
   if (!currentNetworkURL && !networkInfoFromURL) networkInfoFromURL = NetworksInfoEnv[0] //default for ETH right now, will change to handle all chain later
   if (networksInfo !== networkInfoFromURL) return null
@@ -179,7 +185,7 @@ const LayoutWrapper = (props) => {
       <ContentWrapper open={props.savedOpen}>
         <SideNav />
         <BottomBar />
-        <Center id="center">
+        <Center id='center'>
           {props.children}
           <Marginer />
         </Center>
@@ -264,10 +270,38 @@ function App() {
           }}
         />
 
-        <Route path='/:network?/home' render={() => <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}><GlobalPage /></LayoutWrapper>} />
-        <Route path='/:network?/tokens' render={() => <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}><AllTokensPage /></LayoutWrapper>} />
-        <Route path='/:network?/pairs' render={() => <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}><AllPairsPage /></LayoutWrapper>} />
-        <Route path='/:network?/accounts' render={() => <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}><AccountLookup /></LayoutWrapper>} />
+        <Route
+          path='/:network?/home'
+          render={() => (
+            <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>
+              <GlobalPage />
+            </LayoutWrapper>
+          )}
+        />
+        <Route
+          path='/:network?/tokens'
+          render={() => (
+            <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>
+              <AllTokensPage />
+            </LayoutWrapper>
+          )}
+        />
+        <Route
+          path='/:network?/pairs'
+          render={() => (
+            <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>
+              <AllPairsPage />
+            </LayoutWrapper>
+          )}
+        />
+        <Route
+          path='/:network?/accounts'
+          render={() => (
+            <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>
+              <AccountLookup />
+            </LayoutWrapper>
+          )}
+        />
         <Route path='/:network?/*' render={() => <RedirectToHome />} />
       </Switch>
     </BrowserRouter>

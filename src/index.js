@@ -20,9 +20,7 @@ function ContextProviders({ children }) {
             <PairDataContextProvider>
               <PoolDataContextProvider>
                 <UserContextProvider>
-                  <NetworkInfoContextProvider>
-                    {children}
-                  </NetworkInfoContextProvider>
+                  <NetworkInfoContextProvider>{children}</NetworkInfoContextProvider>
                 </UserContextProvider>
               </PoolDataContextProvider>
             </PairDataContextProvider>

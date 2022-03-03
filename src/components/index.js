@@ -43,7 +43,7 @@ const Address = ({ address, token, ...rest }) => {
 
   return (
     <Link
-      color="button"
+      color='button'
       href={token ? urls.showToken(address) : urls.showAddress(address)}
       external
       style={{ wordBreak: 'break-all' }}

@@ -127,20 +127,18 @@ function SideNav() {
   const { network: currentNetworkURL } = useParams()
   const prefixNetworkURL = currentNetworkURL ? `/${currentNetworkURL}` : ''
   const history = useHistory()
-  const currentUrl = currentNetworkURL
-    ? history.location.pathname.split('/')[2]
-    : history.location.pathname.split('/')[1]
+  const currentUrl = currentNetworkURL ? history.location.pathname.split('/')[2] : history.location.pathname.split('/')[1]
   return (
     <Wrapper isMobile={below1080}>
       {!below1080 ? (
         <DesktopWrapper>
-          <AutoColumn gap="2rem">
+          <AutoColumn gap='2rem'>
             <Title />
             <AutoRow>
               <SwitchNetworkButton />
             </AutoRow>
             {!below1080 && (
-              <AutoColumn gap="2rem">
+              <AutoColumn gap='2rem'>
                 <BasicLink to={prefixNetworkURL + `/home`}>
                   <Option activeText={currentUrl === 'home'}>
                     <TrendingUp size={16} style={{ marginRight: '.75rem' }} />
@@ -163,7 +161,7 @@ function SideNav() {
                 <BasicLink to={prefixNetworkURL + `/accounts`}>
                   <Option activeText={currentUrl === 'accounts' || currentUrl === 'account'}>
                     <Wallet />
-                    <Text marginLeft="0.75rem"> Wallet Analytics</Text>
+                    <Text marginLeft='0.75rem'> Wallet Analytics</Text>
                   </Option>
                 </BasicLink>
 
@@ -178,21 +176,21 @@ function SideNav() {
               </AutoColumn>
             )}
           </AutoColumn>
-          <AutoColumn gap="0.75rem" style={{ marginBottom: '2.5rem', marginTop: '1.5rem' }}>
+          <AutoColumn gap='0.75rem' style={{ marginBottom: '2.5rem', marginTop: '1.5rem' }}>
             <Option onClick={toggleDarkMode}>
               <ThemeToggle />
             </Option>
 
             <SocialLinks />
             <HeaderText>
-              <Link href="https://kyber.network/" external>
+              <Link href='https://kyber.network/' external>
                 Kyber Network
               </Link>
             </HeaderText>
             {!below1180 && (
               <Polling>
                 <PollingDot />
-                <a href="/">
+                <a href='/'>
                   Updated {!!seconds ? seconds + 's' : '-'} ago <br />
                 </a>
               </Polling>

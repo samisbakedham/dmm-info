@@ -43,8 +43,8 @@ export default function Warning({ type, show, setShow, address }) {
   const textContent = below800 ? (
     <div>
       <Text fontSize={14} fontWeight={500} lineHeight={'155.23%'} mt={'10px'} lineSpacing={'normal'}>
-        Anyone can create and name any ERC20 token on {networksInfo.NAME}, including creating fake versions of existing
-        tokens that claim to represent projects that do not have a token.
+        Anyone can create and name any ERC20 token on {networksInfo.NAME}, including creating fake versions of existing tokens
+        that claim to represent projects that do not have a token.
       </Text>
       <Text fontSize={14} fontWeight={500} lineHeight={'155.23%'} mt={'10px'}>
         Similar to {getEtherscanLinkText(networksInfo)}, this site automatically tracks analytics for all ERC20 tokens independent
@@ -53,10 +53,10 @@ export default function Warning({ type, show, setShow, address }) {
     </div>
   ) : (
     <Text fontSize={14} fontWeight={500} lineHeight={'155.23%'} mt={'10px'} lineSpacing={'normal'}>
-      Anyone can create and name any ERC20 token on {networksInfo.NAME}, including creating fake versions of existing
-      tokens that claim to represent projects that do not have a token. Similar to {getEtherscanLinkText(networksInfo)}, this site
-      automatically tracks analytics for all ERC20 tokens independent of token integrity. Please do your own research
-      before interacting with any ERC20 token.
+      Anyone can create and name any ERC20 token on {networksInfo.NAME}, including creating fake versions of existing tokens that
+      claim to represent projects that do not have a token. Similar to {getEtherscanLinkText(networksInfo)}, this site
+      automatically tracks analytics for all ERC20 tokens independent of token integrity. Please do your own research before
+      interacting with any ERC20 token.
     </Text>
   )
 
@@ -65,7 +65,7 @@ export default function Warning({ type, show, setShow, address }) {
 
   return (
     <WarningWrapper show={show}>
-      <AutoColumn gap="4px">
+      <AutoColumn gap='4px'>
         <RowFixed>
           <StyledWarningIcon />
           <Text fontWeight={500} fontSize={16} color={'#ffaf01'} lineHeight={'145.23%'} ml={'10px'}>
@@ -83,7 +83,7 @@ export default function Warning({ type, show, setShow, address }) {
                   lineHeight={'145.23%'}
                   color={theme.primary}
                   href={`${networksInfo.ETHERSCAN_URL}/address/${address}`}
-                  target="_blank"
+                  target='_blank'
                 >
                   View {contractTypeLabel} contract on {getEtherscanLinkText(networksInfo)}
                 </Link>
@@ -106,7 +106,7 @@ export default function Warning({ type, show, setShow, address }) {
                   lineHeight={'145.23%'}
                   color={theme.primary}
                   href={`${networksInfo.ETHERSCAN_URL}/address/${address}`}
-                  target="_blank"
+                  target='_blank'
                 >
                   View {contractTypeLabel} contract on {getEtherscanLinkText(networksInfo)}
                 </Link>

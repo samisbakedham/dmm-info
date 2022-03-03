@@ -61,13 +61,16 @@ const ButtonText = styled.span`
 `
 
 const Page404 = ({ type, currentChainName, availableChains, redirectLink }) => {
-
   let message, linkMessage
   if (availableChains?.length) {
     const availableChainElement = availableChains
       .map(availableChain => <Link to={'/' + availableChain.URL_KEY + '/'}>{availableChain.NAME}</Link>)
-      .reduce((accu, elem) => accu ? [elem] : [...accu, ',', elem], null)
-    message = <>This {type} is not available on {currentChainName}. This {type} is only available on these chain: {availableChainElement}</>
+      .reduce((accu, elem) => (accu ? [elem] : [...accu, ',', elem]), null)
+    message = (
+      <>
+        This {type} is not available on {currentChainName}. This {type} is only available on these chain: {availableChainElement}
+      </>
+    )
     linkMessage = <>Or you can go back to {type}s list</>
   } else {
     message = <>This {type} is not available.</>
@@ -77,12 +80,10 @@ const Page404 = ({ type, currentChainName, availableChains, redirectLink }) => {
   return (
     <Wrapper>
       <Content>
-        <img src={MaintenanceImg} width="100%" alt="maintain" style={{ maxWidth: '456px' }} />
+        <img src={MaintenanceImg} width='100%' alt='maintain' style={{ maxWidth: '456px' }} />
         <Title>Something went wrong!</Title>
 
-        <Message>
-          {message}
-        </Message>
+        <Message>{message}</Message>
 
         <StyledLink to={String(redirectLink)}>
           <ButtonText>{linkMessage}</ButtonText>

@@ -28,7 +28,7 @@ const PageButtons = styled.div`
 
 const Arrow = styled.div`
   color: ${({ theme }) => theme.primary1};
-  opacity: ${(props) => (props.faded ? 0.3 : 1)};
+  opacity: ${props => (props.faded ? 0.3 : 1)};
   padding: 0 20px;
   user-select: none;
   :hover {
@@ -144,16 +144,11 @@ function PositionList({ positions }) {
       <>
         <DashGrid style={{ opacity: poolOwnership > 0 ? 1 : 0.6 }} focus={true}>
           {!below740 && (
-            <DataText grid-area="pair" justifyContent="flex-start" alignItems="flex-start">
-              <AutoColumn gap="8px" justify="flex-start" align="flex-start">
-                <DoubleTokenLogo
-                  size={16}
-                  a0={position.pair.token0.id}
-                  a1={position.pair.token1.id}
-                  margin={!below740}
-                />
+            <DataText grid-area='pair' justifyContent='flex-start' alignItems='flex-start'>
+              <AutoColumn gap='8px' justify='flex-start' align='flex-start'>
+                <DoubleTokenLogo size={16} a0={position.pair.token0.id} a1={position.pair.token1.id} margin={!below740} />
               </AutoColumn>
-              <AutoColumn gap="8px" justify="flex-end" style={{ marginLeft: '8px' }}>
+              <AutoColumn gap='8px' justify='flex-end' style={{ marginLeft: '8px' }}>
                 <CustomLink to={prefixNetworkURL + '/pair/' + position.pair.id}>
                   <TYPE.main style={{ whiteSpace: 'nowrap' }} to={prefixNetworkURL + '/pair/'}>
                     <FormattedName
@@ -168,10 +163,10 @@ function PositionList({ positions }) {
           )}
 
           <DataText
-            grid-area="pool"
-            justifyContent="flex-end"
+            grid-area='pool'
+            justifyContent='flex-end'
             alignItems={below740 ? 'flex-start' : 'flex-end'}
-            flexDirection="column"
+            flexDirection='column'
           >
             <CustomLink to={prefixNetworkURL + '/pool/' + position.pool.id}>
               <TYPE.main style={{ whiteSpace: 'nowrap' }} to={prefixNetworkURL + '/pair/'}>
@@ -183,16 +178,11 @@ function PositionList({ positions }) {
               </TYPE.main>
             </CustomLink>
             {below740 && (
-              <Flex marginTop="12px">
-                <AutoColumn gap="8px" justify="flex-start" align="flex-start">
-                  <DoubleTokenLogo
-                    size={16}
-                    a0={position.pair.token0.id}
-                    a1={position.pair.token1.id}
-                    margin={!below740}
-                  />
+              <Flex marginTop='12px'>
+                <AutoColumn gap='8px' justify='flex-start' align='flex-start'>
+                  <DoubleTokenLogo size={16} a0={position.pair.token0.id} a1={position.pair.token1.id} margin={!below740} />
                 </AutoColumn>
-                <AutoColumn gap="8px" justify="flex-end" style={{ marginLeft: '8px' }}>
+                <AutoColumn gap='8px' justify='flex-end' style={{ marginLeft: '8px' }}>
                   <CustomLink to={prefixNetworkURL + '/pair/' + position.pair.id}>
                     <TYPE.main style={{ whiteSpace: 'nowrap' }} to={prefixNetworkURL + '/pair/'}>
                       <FormattedName
@@ -207,17 +197,15 @@ function PositionList({ positions }) {
             )}
           </DataText>
 
-          <DataText grid-area="liquidity" justifyContent="flex-end" alignItems={'flex-end'} flexDirection="column">
+          <DataText grid-area='liquidity' justifyContent='flex-end' alignItems={'flex-end'} flexDirection='column'>
             <TYPE.main>{formattedNum(valueUSD, true, true)}</TYPE.main>
           </DataText>
 
           {!below740 && (
-            <DataText grid-area="tokenAmount" justifyContent="flex-end">
-              <AutoColumn justify="flex-end">
-                <Flex justifyContent="flex-end">
-                  <TYPE.main fontWeight={400}>
-                    {formattedNum(poolOwnership * parseFloat(position.pool.reserve1))}{' '}
-                  </TYPE.main>
+            <DataText grid-area='tokenAmount' justifyContent='flex-end'>
+              <AutoColumn justify='flex-end'>
+                <Flex justifyContent='flex-end'>
+                  <TYPE.main fontWeight={400}>{formattedNum(poolOwnership * parseFloat(position.pool.reserve1))} </TYPE.main>
                   <FormattedName
                     text={position.pool.token1.symbol}
                     margin={true}
@@ -226,10 +214,8 @@ function PositionList({ positions }) {
                   />
                 </Flex>
                 {below900 && (
-                  <Flex marginTop="12px">
-                    <TYPE.main fontWeight={400}>
-                      {formattedNum(poolOwnership * parseFloat(position.pool.reserve0))}{' '}
-                    </TYPE.main>
+                  <Flex marginTop='12px'>
+                    <TYPE.main fontWeight={400}>{formattedNum(poolOwnership * parseFloat(position.pool.reserve0))} </TYPE.main>
                     <FormattedName
                       text={position.pool.token0.symbol}
                       maxCharacters={below740 ? 10 : 18}
@@ -243,10 +229,8 @@ function PositionList({ positions }) {
           )}
 
           {!below900 && (
-            <DataText grid-area="tokenAmount2" justifyContent="flex-end">
-              <TYPE.main fontWeight={400}>
-                {formattedNum(poolOwnership * parseFloat(position.pool.reserve0))}{' '}
-              </TYPE.main>
+            <DataText grid-area='tokenAmount2' justifyContent='flex-end'>
+              <TYPE.main fontWeight={400}>{formattedNum(poolOwnership * parseFloat(position.pool.reserve0))} </TYPE.main>
               <FormattedName
                 text={position.pool.token0.symbol}
                 maxCharacters={below740 ? 10 : 18}
@@ -257,8 +241,8 @@ function PositionList({ positions }) {
           )}
 
           {!below740 && (
-            <DataText grid-area="action" justifyContent="flex-end">
-              <Flex justifyContent="flex-end" flexDirection={below740 ? 'column' : 'row'} sx={{ gap: '6px' }}>
+            <DataText grid-area='action' justifyContent='flex-end'>
+              <Flex justifyContent='flex-end' flexDirection={below740 ? 'column' : 'row'} sx={{ gap: '6px' }}>
                 <Link
                   external
                   href={getPoolLink(position.pool.token0.id, networksInfo, position.pool.token1.id, false, position.pool.id)}
@@ -352,14 +336,14 @@ function PositionList({ positions }) {
   return (
     <ListWrapper>
       <TableHeader center={true}>
-        {!below740 && <Text area="pair">Pair</Text>}
-        <Flex alignItems="flex-start" justifyContent="flex-end">
-          <Text area="pool">Pool</Text>
+        {!below740 && <Text area='pair'>Pair</Text>}
+        <Flex alignItems='flex-start' justifyContent='flex-end'>
+          <Text area='pool'>Pool</Text>
         </Flex>
-        <Flex alignItems="center">
+        <Flex alignItems='center'>
           <ClickableText
-            area="liquidity"
-            onClick={(e) => {
+            area='liquidity'
+            onClick={e => {
               setSortedColumn(SORT_FIELD.VALUE)
               setSortDirection(sortedColumn !== SORT_FIELD.VALUE ? true : !sortDirection)
             }}
@@ -368,18 +352,18 @@ function PositionList({ positions }) {
           </ClickableText>
         </Flex>
         {!below740 && (
-          <Flex alignItems="flex-start" justifyContent="flex-end">
-            <Text area="tokenAmount">Token Amount</Text>
+          <Flex alignItems='flex-start' justifyContent='flex-end'>
+            <Text area='tokenAmount'>Token Amount</Text>
           </Flex>
         )}
         {!below900 && (
-          <Flex alignItems="flex-start" justifyContent="flex-end">
-            <Text area="tokenAmount2">Token Amount</Text>
+          <Flex alignItems='flex-start' justifyContent='flex-end'>
+            <Text area='tokenAmount2'>Token Amount</Text>
           </Flex>
         )}
         {!below740 && (
-          <Flex alignItems="flex-start" justifyContent="flex-end">
-            <Text area="action">Add/Remove</Text>
+          <Flex alignItems='flex-start' justifyContent='flex-end'>
+            <Text area='action'>Add/Remove</Text>
           </Flex>
         )}
       </TableHeader>

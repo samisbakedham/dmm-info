@@ -92,7 +92,7 @@ export default function NetworkModal() {
   return (
     <Modal isOpen={networkModalOpen} onDismiss={toggleNetworkModal}>
       <ModalContentWrapper ref={node}>
-        <ModalHeader onClose={toggleNetworkModal} title="Select a Network" />
+        <ModalHeader onClose={toggleNetworkModal} title='Select a Network' />
 
         <InstructionText>You are currently on {networksInfo.NAME} Analytics page. Switch network?</InstructionText>
 
@@ -100,11 +100,11 @@ export default function NetworkModal() {
           {NetworksInfoEnv.map((network, index) => {
             if (networksInfo.ENV_KEY === network.ENV_KEY) {
               return (
-                <SelectNetworkButton key={index} padding="0">
+                <SelectNetworkButton key={index} padding='0'>
                   <ListItem selected>
                     <img
                       src={NETWORK_ICON[network.CHAIN_ID]}
-                      alt="Switch Network"
+                      alt='Switch Network'
                       style={{ width: '2rem', marginRight: '1rem' }}
                     />
                     <NetworkLabel>{network.NAME}</NetworkLabel>
@@ -139,10 +139,9 @@ export default function NetworkModal() {
             }
             const linkTo = `/${network.URL_KEY}/` + currentUrl
             return (
-              <Link to={linkTo}>
+              <Link to={linkTo} key={index}>
                 <SelectNetworkButton
-                  key={index}
-                  padding="0"
+                  padding='0'
                   onClick={() => {
                     toggleNetworkModal()
                   }}
@@ -150,7 +149,7 @@ export default function NetworkModal() {
                   <ListItem>
                     <img
                       src={NETWORK_ICON[network.CHAIN_ID]}
-                      alt="Switch Network"
+                      alt='Switch Network'
                       style={{ width: '2rem', marginRight: '1rem' }}
                     />
                     <NetworkLabel>{network.NAME}</NetworkLabel>

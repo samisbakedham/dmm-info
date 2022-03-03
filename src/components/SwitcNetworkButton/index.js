@@ -47,10 +47,10 @@ const SwitchNetworkButton = () => {
   return (
     <ButtonWrapper onClick={toggleNetworkModal}>
       <NetworkWrapper>
-        <img src={NETWORK_ICON[chainId]} alt="Network Icon" style={{ width: '20px' }} />
+        <img src={NETWORK_ICON[chainId]} alt='Network Icon' style={{ width: '20px' }} />
         {!below576 && <NetworkLabel>{networksInfo.NAME}</NetworkLabel>}
       </NetworkWrapper>
-      <img src={SwitchNetworkIcon} alt="Switch Network Icon" style={{ marginTop: '4px', marginLeft: '6px' }} />
+      <img src={SwitchNetworkIcon} alt='Switch Network Icon' style={{ marginTop: '4px', marginLeft: '6px' }} />
     </ButtonWrapper>
   )
 }

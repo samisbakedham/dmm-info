@@ -77,7 +77,7 @@ const PoolAddressContainer = styled(Flex)`
 const formatDataText = (value, trackedValue, supressWarning = false) => {
   const showUntracked = value !== '$0' && !trackedValue & !supressWarning
   return (
-    <AutoColumn gap="2px" style={{ opacity: showUntracked ? '0.7' : '1' }}>
+    <AutoColumn gap='2px' style={{ opacity: showUntracked ? '0.7' : '1' }}>
       <div style={{ textAlign: 'left' }}>{value}</div>
       <TYPE.light fontSize={'9px'} style={{ textAlign: 'right' }}>
         {showUntracked ? 'unstable' : '  '}
@@ -118,7 +118,7 @@ export const ItemCard = ({ pool }) => {
     <div>
       {isWarning && (
         <div style={{ position: 'absolute' }}>
-          <MouseoverTooltip text="One token is close to 0% in the pool ratio. Pool might go inactive.">
+          <MouseoverTooltip text='One token is close to 0% in the pool ratio. Pool might go inactive.'>
             <WarningLeftIcon />
           </MouseoverTooltip>
         </div>
@@ -127,7 +127,7 @@ export const ItemCard = ({ pool }) => {
       <StyledItemCard>
         <GridItem style={{ gridColumn: '1 / span 2' }}>
           <DataTitle>Pool</DataTitle>
-          <DataText grid-area="pool">
+          <DataText grid-area='pool'>
             <PoolAddressContainer>
               <CustomLink to={prefixNetworkURL + `/pool/${pool.id}`} style={{ cursor: 'pointer' }}>
                 {shortenPoolAddress}
@@ -139,10 +139,7 @@ export const ItemCard = ({ pool }) => {
 
         <GridItem>
           <DataText style={{ alignItems: 'flex-end', color: theme.primary }}>
-            <Link
-              href={`${networksInfo.DMM_SWAP_URL}add/${pool.token0.id}/${pool.token1.id}/${pool.id}`}
-              target="_blank"
-            >
+            <Link href={`${networksInfo.DMM_SWAP_URL}add/${pool.token0.id}/${pool.token1.id}/${pool.id}`} target='_blank'>
               <ButtonLight>+ Add</ButtonLight>
             </Link>
           </DataText>
@@ -150,15 +147,15 @@ export const ItemCard = ({ pool }) => {
 
         <GridItem>
           <DataTitle>Liquidity</DataTitle>
-          <DataText grid-area="liq">{formatDataText(formattedNum(liquidity, true), pool.trackedReserveUSD)}</DataText>
+          <DataText grid-area='liq'>{formatDataText(formattedNum(liquidity, true), pool.trackedReserveUSD)}</DataText>
         </GridItem>
         <GridItem>
           <DataTitle>Volume (24h)</DataTitle>
-          <DataText grid-area="vol">{formatDataText(formattedNum(volume, true), pool.oneDayVolumeUSD)}</DataText>
+          <DataText grid-area='vol'>{formatDataText(formattedNum(volume, true), pool.oneDayVolumeUSD)}</DataText>
         </GridItem>
         <GridItem>
           <DataTitle>Ratio</DataTitle>
-          <DataText grid-area="ratio">
+          <DataText grid-area='ratio'>
             <div>{`• ${percentToken0.toFixed(2) ?? '.'}% ${pool.token0.symbol}`}</div>
             <div>{`• ${percentToken1.toFixed(2) ?? '.'}% ${pool.token1.symbol}`}</div>
           </DataText>
@@ -210,40 +207,40 @@ const ListItem = ({ pool, oddRow }) => {
     <TableRow oddRow={oddRow}>
       {isWarning && (
         <div style={{ position: 'absolute', top: '1px' }}>
-          <MouseoverTooltip text="One token is close to 0% in the pool ratio. Pool might go inactive.">
+          <MouseoverTooltip text='One token is close to 0% in the pool ratio. Pool might go inactive.'>
             <WarningLeftIcon />
           </MouseoverTooltip>
         </div>
       )}
       <CustomLink to={prefixNetworkURL + `/pool/${pool.id}`} style={{ cursor: 'pointer' }}>
-        <DataText grid-area="pool" style={{ color: theme.primary }}>
+        <DataText grid-area='pool' style={{ color: theme.primary }}>
           {shortenPoolAddress}
         </DataText>
       </CustomLink>
-      <DataText grid-area="ratio">
+      <DataText grid-area='ratio'>
         <div>{`• ${percentToken0.toFixed(2) ?? '.'}% ${pool.token0.symbol}`}</div>
         <div>{`• ${percentToken1.toFixed(2) ?? '.'}% ${pool.token1.symbol}`}</div>
       </DataText>
-      <DataText grid-area="liq" alignItems="flex-end">
+      <DataText grid-area='liq' alignItems='flex-end'>
         {formatDataText(formattedNum(liquidity, true), pool.trackedReserveUSD)}
       </DataText>
-      <DataText grid-area="vol" alignItems="flex-end">
+      <DataText grid-area='vol' alignItems='flex-end'>
         {formatDataText(formattedNum(volume, true), pool.oneDayVolumeUSD)}
       </DataText>
-      <DataText grid-area="fee" alignItems="flex-end">
+      <DataText grid-area='fee' alignItems='flex-end'>
         {formatDataText(formattedNum(oneDayFee, true), pool.oneDayFeeUSD)}
       </DataText>
-      <DataText grid-area="amp" alignItems="flex-end">
+      <DataText grid-area='amp' alignItems='flex-end'>
         {formattedNum(amp.toPrecision(5))}
       </DataText>
-      <DataText grid-area="fl" style={{ color: '#0FAAA2' }} alignItems="flex-end">
+      <DataText grid-area='fl' style={{ color: '#0FAAA2' }} alignItems='flex-end'>
         {oneYearFL < MAX_ALLOW_APY ? `${oneYearFL}%` : '--'}
       </DataText>
-      <DataText grid-area="add_liquidity" alignItems="flex-end">
+      <DataText grid-area='add_liquidity' alignItems='flex-end'>
         {
           <Link
             href={`${networksInfo.DMM_SWAP_URL}add/${pool.token0.id}/${pool.token1.id}/${pool.id}?networkId=${networksInfo.CHAIN_ID}`}
-            target="_blank"
+            target='_blank'
           >
             <ButtonLight>+ Add</ButtonLight>
           </Link>

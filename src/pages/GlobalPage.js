@@ -78,10 +78,10 @@ function GlobalPage() {
       <ThemedBackground backgroundColor={transparentize(0.8, theme.primary)} />
       <ContentWrapper>
         <div>
-          <AutoColumn gap="24px" style={{ paddingBottom: below800 ? '12px' : '24px' }}>
+          <AutoColumn gap='24px' style={{ paddingBottom: below800 ? '12px' : '24px' }}>
             <Flex
               alignItems={below800 ? 'flex-start' : 'center'}
-              justifyContent="space-between"
+              justifyContent='space-between'
               flexDirection={below800 ? 'column-reverse' : 'row'}
             >
               <TYPE.largeHeader style={{ marginTop: below800 ? '20px' : '0' }}>Summary</TYPE.largeHeader>
@@ -91,13 +91,13 @@ function GlobalPage() {
           </AutoColumn>
           <GridRow>
             <Panel style={{ height: '100%', minHeight: '300px' }}>
-              <GlobalChart display="liquidity" />
+              <GlobalChart display='liquidity' />
             </Panel>
             <Panel style={{ height: '100%' }}>
-              <GlobalChart display="volume" />
+              <GlobalChart display='volume' />
             </Panel>
           </GridRow>
-          <ListOptions gap="10px" style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
+          <ListOptions gap='10px' style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
             <RowBetween>
               <TYPE.main fontSize={'1.125rem'}>Top Tokens</TYPE.main>
               <CustomLink to={prefixNetworkURL + '/tokens'}>See All</CustomLink>
@@ -106,7 +106,7 @@ function GlobalPage() {
           <WrappedPanel style={{ marginTop: '6px' }}>
             <TopTokenList tokens={allTokens} />
           </WrappedPanel>
-          <ListOptions gap="10px" style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
+          <ListOptions gap='10px' style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
             <RowBetween>
               <TYPE.main fontSize={'1rem'}>Top Pairs</TYPE.main>
               <CustomLink to={prefixNetworkURL + '/pairs'}>See All</CustomLink>

@@ -191,7 +191,7 @@ async function getBulkPairData(client, pairList, ethPrice, networksInfo) {
     })
 
     let [oneDayResult, twoDayResult, oneWeekResult] = await Promise.all(
-      [b1, b2, bWeek].map(async (block) => {
+      [b1, b2, bWeek].map(async block => {
         let result = client.query({
           query: PAIRS_HISTORICAL_BULK(block, pairList),
           fetchPolicy: 'cache-first',

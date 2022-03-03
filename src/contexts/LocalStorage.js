@@ -27,7 +27,7 @@ function reducer(state, { type, payload }) {
   switch (type) {
     case UPDATE_KEY: {
       const { key, value } = payload
-      if (!UPDATABLE_KEYS.some((k) => k === key)) {
+      if (!UPDATABLE_KEYS.some(k => k === key)) {
         throw Error(`Unexpected key in LocalStorageContext reducer: '${key}'.`)
       } else {
         return {
@@ -94,7 +94,7 @@ export function useDarkModeManager() {
   const [state, { updateKey }] = useLocalStorageContext()
   let isDarkMode = state[DARK_MODE]
   const toggleDarkMode = useCallback(
-    (value) => {
+    value => {
       updateKey(DARK_MODE, value === false || value === true ? value : !isDarkMode)
     },
     [updateKey, isDarkMode]
@@ -116,10 +116,10 @@ export function usePathDismissed(path) {
 
 export function useSavedAccounts() {
   const [state, { updateKey }] = useLocalStorageContext()
-  const savedAccounts = [...new Set(state?.[SAVED_ACCOUNTS].map((acc) => acc.toLowerCase()))]
+  const savedAccounts = [...new Set(state?.[SAVED_ACCOUNTS].map(acc => acc.toLowerCase()))]
 
   function addAccount(account) {
-    let newAccounts = state?.[SAVED_ACCOUNTS].map((acc) => acc.toLowerCase())
+    let newAccounts = state?.[SAVED_ACCOUNTS].map(acc => acc.toLowerCase())
     if (!newAccounts.includes(account.toLowerCase())) {
       newAccounts.push(account)
       updateKey(SAVED_ACCOUNTS, newAccounts)
@@ -127,7 +127,7 @@ export function useSavedAccounts() {
   }
 
   function removeAccount(account) {
-    let newAccounts = state?.[SAVED_ACCOUNTS].map((acc) => acc.toLowerCase())
+    let newAccounts = state?.[SAVED_ACCOUNTS].map(acc => acc.toLowerCase())
     let index = newAccounts.indexOf(account.toLowerCase())
     if (index > -1) {
       newAccounts.splice(index, 1)

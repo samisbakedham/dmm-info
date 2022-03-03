@@ -45,12 +45,12 @@ function useNetworksInfoContext() {
 function reducer(state, { type, payload }) {
   switch (type) {
     case UPDATE_CHAIN: {
-      const { newChain } = payload;
+      const { newChain } = payload
       const newNetworkInfo = NetworksInfoEnv.find(network => network.ENV_KEY === newChain)
       return {
         networksInfo: newNetworkInfo ? newNetworkInfo : NetworksInfoEnv[0],
         // networksInfo: newNetworkInfo ? [newNetworkInfo] : NetworksInfoEnv,
-      };
+      }
     }
 
     default: {
@@ -61,7 +61,7 @@ function reducer(state, { type, payload }) {
 
 export default function Provider({ children }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
-  const updateChain = useCallback((newChain) => {
+  const updateChain = useCallback(newChain => {
     dispatch({
       type: UPDATE_CHAIN,
       payload: {
@@ -79,10 +79,7 @@ export default function Provider({ children }) {
             updateChain,
           },
         ],
-        [
-          state,
-          updateChain,
-        ]
+        [state, updateChain]
       )}
     >
       {children}

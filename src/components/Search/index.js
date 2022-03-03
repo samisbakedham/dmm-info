@@ -177,7 +177,7 @@ export const Search = ({ small = false }) => {
           let pairs = await exchangeSubgraphClient.query({
             query: PAIR_SEARCH,
             variables: {
-              tokens: tokens.data.asSymbol?.map((t) => t.id),
+              tokens: tokens.data.asSymbol?.map(t => t.id),
               id: value,
             },
           })
@@ -198,9 +198,9 @@ export const Search = ({ small = false }) => {
 
   // add the searched tokens to the list if now found yet
   allTokens = allTokens.concat(
-    searchedTokens.filter((searchedToken) => {
+    searchedTokens.filter(searchedToken => {
       let included = false
-      allTokens.map((token) => {
+      allTokens.map(token => {
         if (token.id === searchedToken.id) {
           included = true
         }
@@ -213,7 +213,7 @@ export const Search = ({ small = false }) => {
   let uniqueTokens = []
   let found = {}
   allTokens &&
-    allTokens.map((token) => {
+    allTokens.map(token => {
       if (!found[token.id]) {
         found[token.id] = true
         uniqueTokens.push(token)
@@ -222,9 +222,9 @@ export const Search = ({ small = false }) => {
     })
 
   allPairs = allPairs.concat(
-    searchedPairs.filter((searchedPair) => {
+    searchedPairs.filter(searchedPair => {
       let included = false
-      allPairs.map((pair) => {
+      allPairs.map(pair => {
         if (pair.id === searchedPair.id) {
           included = true
         }
@@ -237,7 +237,7 @@ export const Search = ({ small = false }) => {
   let uniquePairs = []
   let pairsFound = {}
   allPairs &&
-    allPairs.map((pair) => {
+    allPairs.map(pair => {
       if (!pairsFound[pair.id]) {
         pairsFound[pair.id] = true
         uniquePairs.push(pair)
@@ -248,106 +248,106 @@ export const Search = ({ small = false }) => {
   const filteredTokenList = useMemo(() => {
     return uniqueTokens
       ? uniqueTokens
-        .sort((a, b) => {
-          if (OVERVIEW_TOKEN_BLACKLIST.includes(a.id)) {
+          .sort((a, b) => {
+            if (OVERVIEW_TOKEN_BLACKLIST.includes(a.id)) {
+              return 1
+            }
+            if (OVERVIEW_TOKEN_BLACKLIST.includes(b.id)) {
+              return -1
+            }
+            const tokenA = allTokenData[a.id]
+            const tokenB = allTokenData[b.id]
+            if (tokenA?.oneDayVolumeUSD && tokenB?.oneDayVolumeUSD) {
+              return tokenA.oneDayVolumeUSD > tokenB.oneDayVolumeUSD ? -1 : 1
+            }
+            if (tokenA?.oneDayVolumeUSD && !tokenB?.oneDayVolumeUSD) {
+              return -1
+            }
+            if (!tokenA?.oneDayVolumeUSD && tokenB?.oneDayVolumeUSD) {
+              return tokenA?.totalLiquidity > tokenB?.totalLiquidity ? -1 : 1
+            }
             return 1
-          }
-          if (OVERVIEW_TOKEN_BLACKLIST.includes(b.id)) {
-            return -1
-          }
-          const tokenA = allTokenData[a.id]
-          const tokenB = allTokenData[b.id]
-          if (tokenA?.oneDayVolumeUSD && tokenB?.oneDayVolumeUSD) {
-            return tokenA.oneDayVolumeUSD > tokenB.oneDayVolumeUSD ? -1 : 1
-          }
-          if (tokenA?.oneDayVolumeUSD && !tokenB?.oneDayVolumeUSD) {
-            return -1
-          }
-          if (!tokenA?.oneDayVolumeUSD && tokenB?.oneDayVolumeUSD) {
-            return tokenA?.totalLiquidity > tokenB?.totalLiquidity ? -1 : 1
-          }
-          return 1
-        })
-        .filter((token) => {
-          if (OVERVIEW_TOKEN_BLACKLIST.includes(token.id)) {
-            return false
-          }
-          const regexMatches = Object.keys(token).map((tokenEntryKey) => {
-            const isAddress = value.slice(0, 2) === '0x'
-            if (tokenEntryKey === 'id' && isAddress) {
-              return token[tokenEntryKey].match(new RegExp(escapeRegExp(value), 'i'))
-            }
-            if (tokenEntryKey === 'symbol' && !isAddress) {
-              return token[tokenEntryKey].match(new RegExp(escapeRegExp(value), 'i'))
-            }
-            if (tokenEntryKey === 'name' && !isAddress) {
-              return token[tokenEntryKey].match(new RegExp(escapeRegExp(value), 'i'))
-            }
-            return false
           })
-          return regexMatches.some((m) => m)
-        })
+          .filter(token => {
+            if (OVERVIEW_TOKEN_BLACKLIST.includes(token.id)) {
+              return false
+            }
+            const regexMatches = Object.keys(token).map(tokenEntryKey => {
+              const isAddress = value.slice(0, 2) === '0x'
+              if (tokenEntryKey === 'id' && isAddress) {
+                return token[tokenEntryKey].match(new RegExp(escapeRegExp(value), 'i'))
+              }
+              if (tokenEntryKey === 'symbol' && !isAddress) {
+                return token[tokenEntryKey].match(new RegExp(escapeRegExp(value), 'i'))
+              }
+              if (tokenEntryKey === 'name' && !isAddress) {
+                return token[tokenEntryKey].match(new RegExp(escapeRegExp(value), 'i'))
+              }
+              return false
+            })
+            return regexMatches.some(m => m)
+          })
       : []
   }, [allTokenData, uniqueTokens, value])
 
   const filteredPairList = useMemo(() => {
     return uniquePairs
       ? uniquePairs
-        .sort((a, b) => {
-          const pairA = allPairData[a.id]
-          const pairB = allPairData[b.id]
-          if (pairA?.trackedReserveETH && pairB?.trackedReserveETH) {
-            return parseFloat(pairA.trackedReserveETH) > parseFloat(pairB.trackedReserveETH) ? -1 : 1
-          }
-          if (pairA?.trackedReserveETH && !pairB?.trackedReserveETH) {
-            return -1
-          }
-          if (!pairA?.trackedReserveETH && pairB?.trackedReserveETH) {
-            return 1
-          }
-          return 0
-        })
-        .filter((pair) => {
-          if (PAIR_BLACKLIST.includes(pair.id)) {
-            return false
-          }
-          if (value && value.includes(' ')) {
-            const pairA = value.split(' ')[0]?.toUpperCase()
-            const pairB = value.split(' ')[1]?.toUpperCase()
-            return (
-              (pair.token0.symbol.includes(pairA) || pair.token0.symbol.includes(pairB)) &&
-              (pair.token1.symbol.includes(pairA) || pair.token1.symbol.includes(pairB))
-            )
-          }
-          if (value && value.includes('-')) {
-            const pairA = value.split('-')[0]?.toUpperCase()
-            const pairB = value.split('-')[1]?.toUpperCase()
-            return (
-              (pair.token0.symbol.includes(pairA) || pair.token0.symbol.includes(pairB)) &&
-              (pair.token1.symbol.includes(pairA) || pair.token1.symbol.includes(pairB))
-            )
-          }
-          const regexMatches = Object.keys(pair).map((field) => {
-            const isAddress = value.slice(0, 2) === '0x'
-            if (field === 'id' && isAddress) {
-              return pair[field].match(new RegExp(escapeRegExp(value), 'i'))
+          .sort((a, b) => {
+            const pairA = allPairData[a.id]
+            const pairB = allPairData[b.id]
+            if (pairA?.trackedReserveETH && pairB?.trackedReserveETH) {
+              return parseFloat(pairA.trackedReserveETH) > parseFloat(pairB.trackedReserveETH) ? -1 : 1
             }
-            if (field === 'token0') {
-              return (
-                pair[field].symbol.match(new RegExp(escapeRegExp(value), 'i')) ||
-                pair[field].name.match(new RegExp(escapeRegExp(value), 'i'))
-              )
+            if (pairA?.trackedReserveETH && !pairB?.trackedReserveETH) {
+              return -1
             }
-            if (field === 'token1') {
-              return (
-                pair[field].symbol.match(new RegExp(escapeRegExp(value), 'i')) ||
-                pair[field].name.match(new RegExp(escapeRegExp(value), 'i'))
-              )
+            if (!pairA?.trackedReserveETH && pairB?.trackedReserveETH) {
+              return 1
             }
-            return false
+            return 0
           })
-          return regexMatches.some((m) => m)
-        })
+          .filter(pair => {
+            if (PAIR_BLACKLIST.includes(pair.id)) {
+              return false
+            }
+            if (value && value.includes(' ')) {
+              const pairA = value.split(' ')[0]?.toUpperCase()
+              const pairB = value.split(' ')[1]?.toUpperCase()
+              return (
+                (pair.token0.symbol.includes(pairA) || pair.token0.symbol.includes(pairB)) &&
+                (pair.token1.symbol.includes(pairA) || pair.token1.symbol.includes(pairB))
+              )
+            }
+            if (value && value.includes('-')) {
+              const pairA = value.split('-')[0]?.toUpperCase()
+              const pairB = value.split('-')[1]?.toUpperCase()
+              return (
+                (pair.token0.symbol.includes(pairA) || pair.token0.symbol.includes(pairB)) &&
+                (pair.token1.symbol.includes(pairA) || pair.token1.symbol.includes(pairB))
+              )
+            }
+            const regexMatches = Object.keys(pair).map(field => {
+              const isAddress = value.slice(0, 2) === '0x'
+              if (field === 'id' && isAddress) {
+                return pair[field].match(new RegExp(escapeRegExp(value), 'i'))
+              }
+              if (field === 'token0') {
+                return (
+                  pair[field].symbol.match(new RegExp(escapeRegExp(value), 'i')) ||
+                  pair[field].name.match(new RegExp(escapeRegExp(value), 'i'))
+                )
+              }
+              if (field === 'token1') {
+                return (
+                  pair[field].symbol.match(new RegExp(escapeRegExp(value), 'i')) ||
+                  pair[field].name.match(new RegExp(escapeRegExp(value), 'i'))
+                )
+              }
+              return false
+            })
+            return regexMatches.some(m => m)
+          })
       : []
   }, [allPairData, uniquePairs, value])
 
@@ -381,7 +381,7 @@ export const Search = ({ small = false }) => {
   const wrapperRef = useRef()
   const menuRef = useRef()
 
-  const handleClick = (e) => {
+  const handleClick = e => {
     if (
       !(menuRef.current && menuRef.current.contains(e.target)) &&
       !(wrapperRef.current && wrapperRef.current.contains(e.target))
@@ -408,7 +408,7 @@ export const Search = ({ small = false }) => {
           ref={wrapperRef}
           placeholder={'Search pairs and tokens...'}
           value={value}
-          onChange={(e) => {
+          onChange={e => {
             setValue(e.target.value)
           }}
           onFocus={() => {
@@ -439,7 +439,7 @@ export const Search = ({ small = false }) => {
             </MenuItem>
           )}
           {filteredPairList &&
-            filteredPairList.slice(0, pairsShown).map((pair) => {
+            filteredPairList.slice(0, pairsShown).map(pair => {
               if (pair?.token0?.id === getWETH_ADDRESS(networksInfo)) {
                 pair.token0.name = getNativeTokenWrappedName(networksInfo)
                 pair.token0.symbol = getNativeTokenSymbol(networksInfo)
@@ -452,16 +452,12 @@ export const Search = ({ small = false }) => {
                 <BasicLink to={prefixNetworkURL + '/pair/' + pair.id} key={pair.id} onClick={onDismiss}>
                   <MenuItem>
                     <DoubleTokenLogo a0={pair?.token0?.id} a1={pair?.token1?.id} margin={true} />
-                    <TYPE.body style={{ marginLeft: '10px' }}>
-                      {pair.token0.symbol + '-' + pair.token1.symbol} Pair
-                    </TYPE.body>
+                    <TYPE.body style={{ marginLeft: '10px' }}>{pair.token0.symbol + '-' + pair.token1.symbol} Pair</TYPE.body>
                   </MenuItem>
                 </BasicLink>
               )
             })}
-          <Heading
-            hide={!(Object.keys(filteredPairList).length > 3 && Object.keys(filteredPairList).length >= pairsShown)}
-          >
+          <Heading hide={!(Object.keys(filteredPairList).length > 3 && Object.keys(filteredPairList).length >= pairsShown)}>
             <Blue
               onClick={() => {
                 setPairsShown(pairsShown + 5)
@@ -480,7 +476,7 @@ export const Search = ({ small = false }) => {
               <TYPE.body>No results</TYPE.body>
             </MenuItem>
           )}
-          {filteredTokenList.slice(0, tokensShown).map((token) => {
+          {filteredTokenList.slice(0, tokensShown).map(token => {
             return (
               <BasicLink to={prefixNetworkURL + '/token/' + token.id} key={token.id} onClick={onDismiss}>
                 <MenuItem>
@@ -494,9 +490,7 @@ export const Search = ({ small = false }) => {
             )
           })}
 
-          <Heading
-            hide={!(Object.keys(filteredTokenList).length > 3 && Object.keys(filteredTokenList).length >= tokensShown)}
-          >
+          <Heading hide={!(Object.keys(filteredTokenList).length > 3 && Object.keys(filteredTokenList).length >= tokensShown)}>
             <Blue
               onClick={() => {
                 setTokensShown(tokensShown + 5)

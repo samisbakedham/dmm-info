@@ -76,11 +76,11 @@ function AccountSearch({ history, small, shortenAddress }) {
       {!small && (
         <Flex sx={{ gap: '1rem' }}>
           <Input
-            placeholder="Search Wallet/Account..."
-            onChange={(e) => {
+            placeholder='Search Wallet/Account...'
+            onChange={e => {
               setAccountValue(e.target.value)
             }}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === 'Enter') {
                 handleAccountSearch(e.target.value.trim())
               }
@@ -102,16 +102,16 @@ function AccountSearch({ history, small, shortenAddress }) {
           }}
         >
           <DashGrid center={true} style={{ height: 'fit-content', padding: '0 0 1rem 0' }}>
-            <TYPE.main area="account">Saved Accounts</TYPE.main>
+            <TYPE.main area='account'>Saved Accounts</TYPE.main>
           </DashGrid>
           {!small && <Divider />}
           {savedAccounts?.length > 0 ? (
-            savedAccounts.map((account) => {
+            savedAccounts.map(account => {
               return (
                 <DashGrid key={account} center={true} style={{ height: 'fit-content', padding: '1rem 0 0 0' }}>
                   <Flex
-                    area="account"
-                    justifyContent="space-between"
+                    area='account'
+                    justifyContent='space-between'
                     onClick={() => history.push(prefixNetworkURL + '/account/' + account)}
                   >
                     <AccountLink>
@@ -120,7 +120,7 @@ function AccountSearch({ history, small, shortenAddress }) {
                         : account?.slice(0, 42)}
                     </AccountLink>
                     <Hover
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation()
                         removeAccount(account)
                       }}

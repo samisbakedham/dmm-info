@@ -28,7 +28,7 @@ const PageButtons = styled.div`
 
 const Arrow = styled.div`
   color: ${({ theme }) => theme.primary1};
-  opacity: ${(props) => (props.faded ? 0.3 : 1)};
+  opacity: ${props => (props.faded ? 0.3 : 1)};
   padding: 0 20px;
   user-select: none;
   :hover {
@@ -155,14 +155,14 @@ function TopTokenList({ tokens, itemMax = 5 }) {
     return (
       tokens &&
       Object.keys(tokens)
-        .filter((key) => {
+        .filter(key => {
           return !OVERVIEW_TOKEN_BLACKLIST.includes(key)
         })
-        .filter((key) => {
+        .filter(key => {
           return tokens[key]
         })
-        .filter((key) => tokens[key].name !== 'error-token')
-        .map((key) => tokens[key])
+        .filter(key => tokens[key].name !== 'error-token')
+        .map(key => tokens[key])
     )
   }, [tokens])
 
@@ -195,7 +195,7 @@ function TopTokenList({ tokens, itemMax = 5 }) {
   const ListItem = ({ item, index }) => {
     return (
       <DashGrid style={{ height: '56px' }} focus={true}>
-        <DataText area="name" fontWeight="500">
+        <DataText area='name' fontWeight='500'>
           <Row>
             {!below680 && <div style={{ marginRight: '1rem', width: '10px' }}>{index}</div>}
             <TokenLogo address={item.id} />
@@ -210,18 +210,18 @@ function TopTokenList({ tokens, itemMax = 5 }) {
           </Row>
         </DataText>
         {!below680 && (
-          <DataText area="symbol" fontWeight="500">
+          <DataText area='symbol' fontWeight='500'>
             <FormattedName text={item.symbol} maxCharacters={6} />
           </DataText>
         )}
-        <DataText area="liq">{formattedNum(item.totalLiquidityUSD, true)}</DataText>
-        <DataText area="vol">{formattedNum(item.oneDayVolumeUSD, true)}</DataText>
+        <DataText area='liq'>{formattedNum(item.totalLiquidityUSD, true)}</DataText>
+        <DataText area='vol'>{formattedNum(item.oneDayVolumeUSD, true)}</DataText>
         {!below680 && (
-          <DataText area="price" fontWeight="500">
+          <DataText area='price' fontWeight='500'>
             {formattedNum(item.priceUSD, true)}
           </DataText>
         )}
-        {!below1080 && <DataText area="change">{formattedPercent(item.priceChangeUSD)}</DataText>}
+        {!below1080 && <DataText area='change'>{formattedPercent(item.priceChangeUSD)}</DataText>}
       </DashGrid>
     )
   }
@@ -229,11 +229,11 @@ function TopTokenList({ tokens, itemMax = 5 }) {
   return (
     <ListWrapper>
       <TableHeader center={true} style={{ height: 'fit-content' }}>
-        <Flex alignItems="center" justifyContent="flexStart">
+        <Flex alignItems='center' justifyContent='flexStart'>
           <ClickableText
-            area="name"
-            fontWeight="500"
-            onClick={(e) => {
+            area='name'
+            fontWeight='500'
+            onClick={e => {
               setSortedColumn(SORT_FIELD.NAME)
               setSortDirection(sortedColumn !== SORT_FIELD.NAME ? true : !sortDirection)
             }}
@@ -242,10 +242,10 @@ function TopTokenList({ tokens, itemMax = 5 }) {
           </ClickableText>
         </Flex>
         {!below680 && (
-          <Flex alignItems="center">
+          <Flex alignItems='center'>
             <ClickableText
-              area="symbol"
-              onClick={(e) => {
+              area='symbol'
+              onClick={e => {
                 setSortedColumn(SORT_FIELD.SYMBOL)
                 setSortDirection(sortedColumn !== SORT_FIELD.SYMBOL ? true : !sortDirection)
               }}
@@ -255,10 +255,10 @@ function TopTokenList({ tokens, itemMax = 5 }) {
           </Flex>
         )}
 
-        <Flex alignItems="center">
+        <Flex alignItems='center'>
           <ClickableText
-            area="liq"
-            onClick={(e) => {
+            area='liq'
+            onClick={e => {
               setSortedColumn(SORT_FIELD.LIQ)
               setSortDirection(sortedColumn !== SORT_FIELD.LIQ ? true : !sortDirection)
             }}
@@ -266,10 +266,10 @@ function TopTokenList({ tokens, itemMax = 5 }) {
             Liquidity {sortedColumn === SORT_FIELD.LIQ ? (!sortDirection ? '↑' : '↓') : ''}
           </ClickableText>
         </Flex>
-        <Flex alignItems="center">
+        <Flex alignItems='center'>
           <ClickableText
-            area="vol"
-            onClick={(e) => {
+            area='vol'
+            onClick={e => {
               setSortedColumn(SORT_FIELD.VOL)
               setSortDirection(sortedColumn !== SORT_FIELD.VOL ? true : !sortDirection)
             }}
@@ -279,10 +279,10 @@ function TopTokenList({ tokens, itemMax = 5 }) {
           </ClickableText>
         </Flex>
         {!below680 && (
-          <Flex alignItems="center">
+          <Flex alignItems='center'>
             <ClickableText
-              area="price"
-              onClick={(e) => {
+              area='price'
+              onClick={e => {
                 setSortedColumn(SORT_FIELD.PRICE)
                 setSortDirection(sortedColumn !== SORT_FIELD.PRICE ? true : !sortDirection)
               }}
@@ -292,10 +292,10 @@ function TopTokenList({ tokens, itemMax = 5 }) {
           </Flex>
         )}
         {!below1080 && (
-          <Flex alignItems="center">
+          <Flex alignItems='center'>
             <ClickableText
-              area="change"
-              onClick={(e) => {
+              area='change'
+              onClick={e => {
                 setSortedColumn(SORT_FIELD.CHANGE)
                 setSortDirection(sortedColumn !== SORT_FIELD.CHANGE ? true : !sortDirection)
               }}
@@ -307,7 +307,7 @@ function TopTokenList({ tokens, itemMax = 5 }) {
         )}
       </TableHeader>
       <Divider />
-      {filteredList?.length ?
+      {filteredList?.length ? (
         <List p={0}>
           {filteredList.map((item, index) => {
             return (
@@ -318,8 +318,9 @@ function TopTokenList({ tokens, itemMax = 5 }) {
             )
           })}
         </List>
-        : <LocalLoader />
-      }
+      ) : (
+        <LocalLoader />
+      )}
       <PageButtons>
         <div onClick={() => setPage(page === 1 ? page : page - 1)}>
           <Arrow faded={page === 1 ? true : false}>←</Arrow>

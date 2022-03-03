@@ -29,11 +29,10 @@ export const healthClient = new ApolloClient({
   shouldBatch: true,
 })
 
-export const getBlockClient = (networksInfo) =>
+export const getBlockClient = networksInfo =>
   new ApolloClient({
     link: new HttpLink({
-      uri:
-        networksInfo?.SUBGRAPH_BLOCK_URL,
+      uri: networksInfo?.SUBGRAPH_BLOCK_URL,
     }),
     cache: new InMemoryCache(),
   })

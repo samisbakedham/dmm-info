@@ -63,7 +63,7 @@ function PinnedData({ history, open, setSavedOpen }) {
       </SavedButton>
     </RightColumn>
   ) : (
-    <RightColumn gap="1rem" open={open}>
+    <RightColumn gap='1rem' open={open}>
       <SavedButton onClick={() => setSavedOpen(false)} open={open}>
         <RowFixed>
           <StyledIcon>
@@ -76,17 +76,17 @@ function PinnedData({ history, open, setSavedOpen }) {
         </StyledIcon>
       </SavedButton>
       <AccountSearch small={true} />
-      <AutoColumn gap="40px" style={{ marginTop: '2rem' }}>
+      <AutoColumn gap='40px' style={{ marginTop: '2rem' }}>
         <AutoColumn gap={'12px'}>
           <TYPE.main>Pinned Pairs</TYPE.main>
-          {Object.keys(savedPairs).filter((key) => {
+          {Object.keys(savedPairs).filter(key => {
             return !!savedPairs[key]
           }).length > 0 ? (
             Object.keys(savedPairs)
-              .filter((address) => {
+              .filter(address => {
                 return !!savedPairs[address]
               })
-              .map((address) => {
+              .map(address => {
                 const pair = savedPairs[address]
                 return (
                   <RowBetween key={pair.address}>
@@ -116,14 +116,14 @@ function PinnedData({ history, open, setSavedOpen }) {
 
         <AutoColumn gap={'12px'}>
           <TYPE.main>Pinned Pools</TYPE.main>
-          {Object.keys(savedPools).filter((key) => {
+          {Object.keys(savedPools).filter(key => {
             return !!savedPools[key]
           }).length > 0 ? (
             Object.keys(savedPools)
-              .filter((address) => {
+              .filter(address => {
                 return !!savedPools[address]
               })
-              .map((address) => {
+              .map(address => {
                 const pool = savedPools[address]
                 return (
                   <RowBetween key={pool.address}>
@@ -149,14 +149,14 @@ function PinnedData({ history, open, setSavedOpen }) {
 
         <ScrollableDiv gap={'12px'}>
           <TYPE.main>Pinned Tokens</TYPE.main>
-          {Object.keys(savedTokens).filter((key) => {
+          {Object.keys(savedTokens).filter(key => {
             return !!savedTokens[key]
           }).length > 0 ? (
             Object.keys(savedTokens)
-              .filter((address) => {
+              .filter(address => {
                 return !!savedTokens[address]
               })
-              .map((address) => {
+              .map(address => {
                 const token = savedTokens[address]
                 return (
                   <RowBetween key={address}>
