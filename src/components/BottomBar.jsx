@@ -87,33 +87,30 @@ function BottomBar() {
       <div>
         <SwitchNetworkButton />
       </div>
-      <Flex alignItems="center" color={theme.subText} fontSize="10px">
+      <Flex alignItems='center' color={theme.subText} fontSize='10px'>
         <PollingDot />
-        <a href="/">
+        <a href='/'>
           Updated {!!seconds ? seconds + 's' : '-'} ago <br />
         </a>
       </Flex>
 
-      <ButtonEmpty
-        style={{ background: theme.buttonBlack, borderRadius: '8px', padding: '6px' }}
-        onClick={toggleMenuModal}
-      >
+      <ButtonEmpty style={{ background: theme.buttonBlack, borderRadius: '8px', padding: '6px' }} onClick={toggleMenuModal}>
         <Menu color={theme.text} />
       </ButtonEmpty>
 
       {menuModalOpen && (
         <MenuFlyout>
-          <BasicLink to={prefixNetworkURL + "/accounts"} onClick={() => toggleMenuModal()}>
-            <Flex color={theme.subText} alignItems="center">
+          <BasicLink to={prefixNetworkURL + '/accounts'} onClick={() => toggleMenuModal()}>
+            <Flex color={theme.subText} alignItems='center'>
               <Wallet />
-              <Text marginLeft="8px"> Wallet Analytics</Text>
+              <Text marginLeft='8px'> Wallet Analytics</Text>
             </Flex>
           </BasicLink>
           <Divider />
           <Link href={networksInfo.DMM_SWAP_URL} external onClick={() => toggleMenuModal()}>
-            <Flex color={theme.subText} alignItems="center">
+            <Flex color={theme.subText} alignItems='center'>
               <Repeat size={16} />
-              <Text marginLeft="8px">Swap</Text>
+              <Text marginLeft='8px'>Swap</Text>
             </Flex>
           </Link>
           <Divider />
@@ -121,8 +118,8 @@ function BottomBar() {
 
           <div>
             <SocialLinks />
-            <Text marginTop="12px" fontSize="12px">
-              <Link href="https://kyber.network/" external>
+            <Text marginTop='12px' fontSize='12px'>
+              <Link href='https://kyber.network/' external>
                 Kyber Network
               </Link>
             </Text>
