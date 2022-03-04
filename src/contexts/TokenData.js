@@ -153,7 +153,7 @@ export default function Provider({ children }) {
             updatePriceData,
           },
         ],
-        [state, update, updateTokenTxns, updateChartData, updateTopTokens, updateAllPairs, updatePriceData, ,]
+        [state, update, updateTokenTxns, updateChartData, updateTopTokens, updateAllPairs, updatePriceData]
       )}
     >
       {children}

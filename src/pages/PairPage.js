@@ -269,7 +269,7 @@ function PairPage({ pairAddress, history }) {
                     flexDirection: below1080 ? 'row-reverse' : 'initial',
                   }}
                 >
-                  {!!!savedPairs[pairAddress] && !below1080 ? (
+                  {!savedPairs[pairAddress] && !below1080 ? (
                     <Hover onClick={() => addPair(pairAddress, token0.id, token1.id, token0.symbol, token1.symbol)}>
                       <img src={bookMarkOutline} width={24} height={24} alt='BookMark' style={{ marginRight: '0.5rem' }} />
                     </Hover>

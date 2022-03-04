@@ -52,11 +52,7 @@ function formatPricesForEarlyTimestamps(position, networkInfo): Position {
   return position
 }
 
-async function getPrincipalForUserPerPair(
-  client: ApolloClient<NormalizedCacheObject>,
-  user: string,
-  pairAddress: string
-) {
+async function getPrincipalForUserPerPair(client: ApolloClient<NormalizedCacheObject>, user: string, pairAddress: string) {
   let usd = 0
   let amount0 = 0
   let amount1 = 0
@@ -133,10 +129,8 @@ export function getMetricsForPositionWindow(positionT0: Position, positionT1: Po
   const priceRatioT1 = positionT1.token0PriceUSD != 0 ? positionT1.token1PriceUSD / positionT1.token0PriceUSD : 0
 
   const token0_amount_no_fees = positionT1.token1PriceUSD && priceRatioT1 ? sqrK_t0 * Math.sqrt(priceRatioT1) : 0
-  const token1_amount_no_fees =
-    Number(positionT1.token1PriceUSD) && priceRatioT1 ? sqrK_t0 / Math.sqrt(priceRatioT1) : 0
-  const no_fees_usd =
-    token0_amount_no_fees * positionT1.token0PriceUSD + token1_amount_no_fees * positionT1.token1PriceUSD
+  const token1_amount_no_fees = Number(positionT1.token1PriceUSD) && priceRatioT1 ? sqrK_t0 / Math.sqrt(priceRatioT1) : 0
+  const no_fees_usd = token0_amount_no_fees * positionT1.token0PriceUSD + token1_amount_no_fees * positionT1.token1PriceUSD
 
   const difference_fees_token0 = token0_amount_t1 - token0_amount_no_fees
   const difference_fees_token1 = token1_amount_t1 - token1_amount_no_fees
@@ -176,7 +170,7 @@ export async function getHistoricalPairReturns(
   currentPairData,
   pairSnapshots,
   currentETHPrice,
-  networkInfo,
+  networkInfo
 ) {
   // catch case where data not puplated yet
   if (!currentPairData.createdAtTimestamp) {
@@ -203,7 +197,7 @@ export async function getHistoricalPairReturns(
   const shareValues = await getShareValueOverTime(client, currentPairData.id, dayTimestamps, networkInfo)
   const shareValuesFormatted = {}
   if (shareValues && shareValues.length) {
-    shareValues.forEach((share) => {
+    shareValues.forEach(share => {
       shareValuesFormatted[share.timestamp] = share
     })
   }
@@ -220,7 +214,7 @@ export async function getHistoricalPairReturns(
     const timestampCeiling = dayTimestamp + 86400
 
     // for each change in position value that day, create a window and update
-    const dailyChanges = pairSnapshots.filter((snapshot) => {
+    const dailyChanges = pairSnapshots.filter(snapshot => {
       return snapshot.timestamp < timestampCeiling && snapshot.timestamp > dayTimestamp
     })
     for (let i = 0; i < dailyChanges.length; i++) {
@@ -286,7 +280,7 @@ export async function getLPReturnsOnPair(
   let uniswapReturn = 0
   let fees = 0
 
-  snapshots = snapshots.filter((entry) => {
+  snapshots = snapshots.filter(entry => {
     return entry.pair.id === pair.id
   })
 

@@ -164,7 +164,8 @@ const TradingViewChart = ({ type = CHART_TYPES.BAR, data, base, baseChange, fiel
           }</div>` +
           `<div style="font-size: 22px; margin: 4px 0px; color:${textColor}" >` +
           formattedNum(base ?? 0, true) +
-          `<span style="margin-left: 10px; font-size: 16px; color: ${color};">${formattedPercentChange}</span>` +
+          `<span sty
+          le="margin-left: 10px; font-size: 16px; color: ${color};">${formattedPercentChange}</span>` +
           '</div>'
       }
       setLastBarText()

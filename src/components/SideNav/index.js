@@ -191,7 +191,7 @@ function SideNav() {
               <Polling>
                 <PollingDot />
                 <a href='/'>
-                  Updated {!!seconds ? seconds + 's' : '-'} ago <br />
+                  Updated {seconds ? seconds + 's' : '-'} ago <br />
                 </a>
               </Polling>
             )}

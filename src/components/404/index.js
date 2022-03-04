@@ -64,8 +64,12 @@ const Page404 = ({ type, currentChainName, availableChains, redirectLink }) => {
   let message, linkMessage
   if (availableChains?.length) {
     const availableChainElement = availableChains
-      .map(availableChain => <Link to={'/' + availableChain.URL_KEY + '/'}>{availableChain.NAME}</Link>)
-      .reduce((accu, elem) => (accu ? [elem] : [...accu, ',', elem]), null)
+      .map(availableChain => (
+        <Link to={'/' + availableChain.URL_KEY + '/'} key={availableChain.CHAIN_ID}>
+          {availableChain.NAME}
+        </Link>
+      ))
+      .reduce((accu, elem) => (accu ? [elem] : [...accu, ', ', elem]), null) //join with comma
     message = (
       <>
         This {type} is not available on {currentChainName}. This {type} is only available on these chain: {availableChainElement}
