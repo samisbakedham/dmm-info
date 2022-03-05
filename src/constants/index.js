@@ -78,17 +78,7 @@ export const ChainId = {
   ARBITRUM_TESTNET: 421611,
   ARBITRUM: 42161,
   BTTC: 199,
-}
-
-export const ANALYTICS_URLS = {
-  1: 'https://analytics.kyberswap.com',
-  137: 'https://polygon-analytics.kyberswap.com',
-  56: 'https://bsc-analytics.kyberswap.com',
-  43114: 'https://avax-analytics.kyberswap.com',
-  250: 'https://fantom-analytics.kyberswap.com',
-  25: 'https://cronos-analytics.kyberswap.com',
-  [ChainId.ARBITRUM]: 'https://arbitrum-analytics.kyberswap.com',
-  [ChainId.BTTC]: 'https://bttc-analytics.kyberswap.com',
+  VELAS: 106,
 }
 
 // This variable to handle crazy APR which it can be wrong calculations or a bug

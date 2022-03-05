@@ -570,6 +570,8 @@ export function getNativeTokenSymbol(networkInfo) {
       return 'CRO'
     case 338:
       return 'CRO'
+    case 106:
+      return 'VLX'
     default:
       return 'ETH'
   }
@@ -593,6 +595,8 @@ export function getNativeTokenWrappedName(networkInfo) {
       return 'CRO (Wrapped)'
     case 338:
       return 'CRO (Wrapped)'
+    case 106:
+      return 'VLX (Wrapped)'
     default:
       return 'Ether (Wrapped)'
   }
@@ -616,12 +620,14 @@ export function getEtherscanLinkText(networkInfo) {
       return 'Explorer'
     case 25:
       return 'Explorer'
-    case '421611':
+    case 421611:
       return 'Arbiscan'
-    case '42161':
+    case 42161:
       return 'Arbiscan'
-    case `${ChainId.BTTC}`:
+    case ChainId.BTTC:
       return 'Bttcscan'
+    case ChainId.VELAS:
+      return 'Velas EVM Explorer'
 
     default:
       return 'Etherscan'
@@ -646,6 +652,8 @@ export function getDefaultAddLiquidityUrl(networkInfo) {
       return `${networkInfo.DMM_SWAP_URL}pools/CRO`
     case 338:
       return `${networkInfo.DMM_SWAP_URL}pools/CRO`
+    case 106:
+      return `${networkInfo.DMM_SWAP_URL}pools/VLX`
     default:
       return `${networkInfo.DMM_SWAP_URL}pools/ETH/${getKNC_ADDRESS(networkInfo)}`
   }
