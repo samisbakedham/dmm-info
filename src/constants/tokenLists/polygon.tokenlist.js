@@ -1,4 +1,11 @@
 const POLYGON_TOKEN_LIST = {
+  '0x5423063af146F5abF88Eb490486E6B53FA135eC9': {
+    address: '0x5423063af146F5abF88Eb490486E6B53FA135eC9',
+    symbol: 'CNDL',
+    name: 'Candle',
+    decimals: 18,
+    logoURI: 'https://i.ibb.co/XCmMmx9/candleenlargedicon-256x255.png',
+  },
   '0x3A3e7650f8B9f667dA98F236010fBf44Ee4B2975': {
     address: '0x3A3e7650f8B9f667dA98F236010fBf44Ee4B2975',
     symbol: 'XUSD',

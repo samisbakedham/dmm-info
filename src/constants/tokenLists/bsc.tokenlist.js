@@ -6,6 +6,13 @@ const BSC_TOKEN_LIST = {
     decimals: 18,
     logoURI: 'https://i.imgur.com/RoTnvYw.png',
   },
+  '0xdaBcdBc8eCEbE3b2f59ee7B5FC1a46FEEF50dB5A': {
+    address: '0xdaBcdBc8eCEbE3b2f59ee7B5FC1a46FEEF50dB5A',
+    symbol: 'CNDL',
+    name: 'Candle',
+    decimals: 18,
+    logoURI: 'https://i.ibb.co/XCmMmx9/candleenlargedicon-256x255.png',
+  },
   '0x4A9A2b2b04549C3927dd2c9668A5eF3fCA473623': {
     chainId: 56,
     address: '0x4A9A2b2b04549C3927dd2c9668A5eF3fCA473623',

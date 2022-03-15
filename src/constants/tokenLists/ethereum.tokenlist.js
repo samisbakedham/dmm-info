@@ -13,6 +13,13 @@ const ETHEREUM_TOKEN_LIST = {
     decimals: 18,
     logoURI: 'https://mycoldwalletnow.wpcomstaging.com/htdocs/wp-content/mcwhp/img/logo.svg',
   },
+  '0xbc138bD20C98186CC0342C8e380953aF0cb48BA8': {
+    address: '0xbc138bD20C98186CC0342C8e380953aF0cb48BA8',
+    symbol: 'CNDL',
+    name: 'Candle',
+    decimals: 18,
+    logoURI: 'https://i.ibb.co/XCmMmx9/candleenlargedicon-256x255.png',
+  },
   '0x6e36556B3ee5Aa28Def2a8EC3DAe30eC2B208739': {
     address: '0x6e36556B3ee5Aa28Def2a8EC3DAe30eC2B208739',
     symbol: 'BUILD',
