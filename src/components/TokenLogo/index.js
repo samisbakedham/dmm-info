@@ -347,14 +347,14 @@ export default function TokenLogo({ address, header = false, size = '24px', ...r
       path = getCronosTokenLogoURL(address)
       break
 
-    case `${ChainId.ARBITRUM}`:
+    case ChainId.ARBITRUM:
       if (formattedAddress && ARBITRUM_TOKEN_LIST[formattedAddress]) {
         return getCustomLogo({ address, src: ARBITRUM_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
       }
       path = `https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/arbitrum/assets/${isAddress(address)}/logo.png`
       break
 
-    case `${ChainId.VELAS}`:
+    case ChainId.VELAS:
       if (formattedAddress && VELAS_TOKEN_LIST[formattedAddress]) {
         return getCustomLogo({ address, src: VELAS_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
       }
@@ -374,7 +374,7 @@ export default function TokenLogo({ address, header = false, size = '24px', ...r
       path = 'error'
       break
 
-    case `${ChainId.BTTC}`:
+    case ChainId.BTTC:
       if (formattedAddress && BTTC_TOKEN_LIST[formattedAddress]) {
         return getCustomLogo({ address, src: BTTC_TOKEN_LIST[formattedAddress].logoURI, size, setError, ...rest })
       }

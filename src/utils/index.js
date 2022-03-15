@@ -624,13 +624,13 @@ export function getEtherscanLinkText(networkInfo) {
       return 'Explorer'
     case 25:
       return 'Explorer'
-    case '421611':
+    case 421611:
       return 'Arbiscan'
-    case '42161':
+    case 42161:
       return 'Arbiscan'
-    case `${ChainId.BTTC}`:
+    case ChainId.BTTC:
       return 'Bttcscan'
-    case `${ChainId.VELAS}`:
+    case ChainId.VELAS:
       return 'Velas EVM Explorer'
     case ChainId.AURORA:
       return 'Aurora Explorer'
