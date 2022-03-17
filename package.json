@@ -133,7 +133,7 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "eth-block-timestamp": "0.0.6",
-    "ethereum-block-by-date": "^1.2.5",
+    "ethereum-block-by-date": "^1.4.2",
     "swr": "^1.0.1"
   }
 }

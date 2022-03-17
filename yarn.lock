@@ -5605,10 +5605,10 @@ eth-lib@^0.1.26:
     ws "^3.0.0"
     xhr-request-promise "^0.1.2"
 
-ethereum-block-by-date@^1.2.5:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/ethereum-block-by-date/-/ethereum-block-by-date-1.3.2.tgz#5e24db0489febad1c998ada7d6261ace0cccca7f"
-  integrity sha512-r21ipnj9I5ZwyvypS93RDct/6rDZz0T5b27Gw200LStpk5mEW5RzdQQAFY8amcY6fbMRLK3jXJxc753Ay8Y8mw==
+ethereum-block-by-date@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/ethereum-block-by-date/-/ethereum-block-by-date-1.4.2.tgz#ff7ee7c97db89a983a15c2f651a137ba5a0a1af9"
+  integrity sha512-nSib8vMu5diAn+pI7KZ3qadw5vkyM19slBDGG97F6WWOuOOaXg9AyJfe7GhcqJRW6VIoEhu0gwUdsURS+r492w==
   dependencies:
     moment "^2.29.1"
 
